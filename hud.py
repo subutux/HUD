@@ -78,23 +78,45 @@ except Exception as e:
 # For now, only use our "Light" section
 
 # try to get the state of the entity
-states = remote.get_state(hass,"group.{}".format(str(config["Lights"]["group"])))
-lights = states.attributes['entity_id']
 
 app = gui.Desktop(theme=gui.Theme("./pgu.theme"))
 app.connect(gui.QUIT,app.quit,None)
 
-c=gui.Table(width=220)
-for light in lights:
-	c.tr()
-	l = remote.get_state(hass,light)
-	b = elements.Light(hass,l,width=180)
-	c.td(b)
+container=gui.Table(width=230)
+
+for section in config.sections():
+	if section != "HomeAssistant":
+		c = gui.Table(width=320)
+		c.tr()
+		c.td(gui.Label(section))
+		
+		state = remote.get_state(hass,"group.{}".format(str(config[section]["group"])))
+		if state == None:
+			c.tr()
+			c.td(gui.Label("Unable to find group.{}".format(str(config[section]["group"]))))
+		else:
+			entity_ids = state.attributes['entity_id']
+			for entity_id in entity_ids:
+				c.tr()
+				entity = remote.get_state(hass,entity_id)
+				# Changeable, lights are hmmMMmmm
+				if (entity.domain == "light"):
+					widget = gui.Table(width=320)
+					widget.tr()
+					widget.td(elements.Light(hass,entity,width=300,height=30))
+					widget.td(elements.LightSwitch(hass,entity,width=20,height=30))
+					
+					c.td(widget)
+				elif (entity.domain == "sensor"):
+					widget = gui.Label("{} : {}".format(str(entity.name),str(entity.state)))
+					c.td(widget)
+		container.tr()
+		container.td(c)
 
 main = gui.Container(width=230,height=600)
 header = gui.Label('Home Assistant',cls='h1')
 header.style.background="#0088FF"
 main.add(header,10,10)
-main.add(c,0,40)
+main.add(container,0,40)
 app.run(main)
 
