@@ -81,14 +81,20 @@ except Exception as e:
 states = remote.get_state(hass,"group.{}".format(str(config["Lights"]["group"])))
 lights = states.attributes['entity_id']
 
-app = gui.Desktop()
+app = gui.Desktop(theme=gui.Theme("./pgu.theme"))
 app.connect(gui.QUIT,app.quit,None)
 
-c=gui.Table()
+c=gui.Table(width=220)
 for light in lights:
 	c.tr()
 	l = remote.get_state(hass,light)
-	b = elements.Light(hass,l)
+	b = elements.Light(hass,l,width=180)
 	c.td(b)
-app.run(c)
+
+main = gui.Container(width=230,height=600)
+header = gui.Label('Home Assistant',cls='h1')
+header.style.background="#0088FF"
+main.add(header,10,10)
+main.add(c,0,40)
+app.run(main)
 
