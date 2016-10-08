@@ -16,7 +16,7 @@ except:
 	print("Unable to import pgu.gui! (See the readme for installing pgu)")
 
 import elements
-
+from eventHandler import HAEventHandler
 import sys
 import argparse
 import configparser
@@ -65,6 +65,7 @@ except KeyError as e:
 # Setup home assistant connection
 
 hass = remote.API(haconfig['host'],haconfig['key'],haconfig['port'],haconfig['ssl'])
+HAE = HAEventHandler(hass)
 try:
 	validation = remote.validate_api(hass)
 	if str(validation) != "ok":
@@ -74,6 +75,8 @@ except Exception as e:
 	print ("hass connection verification failed: {}".format(str(validation)))
 	exit(1)
 
+
+screen = pygame.display.set_mode((350,600),SWSURFACE)
 
 # For now, only use our "Light" section
 
@@ -103,8 +106,12 @@ for section in config.sections():
 				if (entity.domain == "light"):
 					widget = gui.Table(width=320)
 					widget.tr()
-					widget.td(elements.Light(hass,entity,width=300,height=30))
-					widget.td(elements.LightSwitch(hass,entity,width=20,height=30))
+					l = elements.Light(hass,entity,width=300,height=20)
+					HAE.add_listener(entity.entity_id,l.set_hass_event)
+					widget.td(l)
+					s = elements.LightSwitch(hass,entity,width=20,height=30)
+					widget.td(s)
+					HAE.add_listener(entity.entity_id,s.set_hass_event)
 					
 					c.td(widget)
 				elif (entity.domain == "sensor"):
@@ -113,10 +120,35 @@ for section in config.sections():
 		container.tr()
 		container.td(c)
 
-main = gui.Container(width=230,height=600)
+main = gui.Container(width=320,height=600)
 header = gui.Label('Home Assistant',cls='h1')
 header.style.background="#0088FF"
 main.add(header,10,10)
 main.add(container,0,40)
-app.run(main)
+app.init(main)
+clock = pygame.time.Clock()
+wait = 5000 # 5s
+last_tick = 0
+done = False
+while not done:
+	for e in pygame.event.get():
+		if e.type is QUIT:
+			done = True
+		elif e.type is KEYDOWN and e.key == K_ESCAPE:
+			done = True
+		else:
+			app.event(e)
+	dt = clock.tick(30)/1000.0
+	app.paint()
 
+	# hass events grabber
+	now_tick = pygame.time.get_ticks();
+	if (now_tick - last_tick) >= wait:
+		print("Fetch")
+		HAE.update()
+		last_tick=now_tick
+
+
+	pygame.display.flip()
+
+print("Started")
