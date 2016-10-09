@@ -42,11 +42,8 @@ class HAEventHandler(threading.Thread):
 		for msg in messages:
 			if hasattr(msg,"data") and msg.data != "ping":
 				data = json.loads(msg.data)
-				pprint.pprint(data["event_type"])
 				if data["event_type"] == "state_changed":
-					print("STATE")
-					state = ha.State.from_dict(data["data"])
-					pprint.pprint ("State: {}".format(str(state)))
+					state = ha.State.from_dict(data["data"]["new_state"])
 					if state.entity_id in self.callbacks:
 						for cb in self.callbacks[state.entity_id]:
 							cb(state)
