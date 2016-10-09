@@ -121,10 +121,11 @@ for section in config.sections():
 		container.td(c)
 
 main = gui.Container(width=320,height=600)
-header = gui.Label('Home Assistant',cls='h1')
-header.style.background="#0088FF"
-main.add(header,10,10)
-main.add(container,0,40)
+header = elements.Header("Home Assistant",width=360,height=40)
+
+
+main.add(header,0,0)
+main.add(container,0,70)
 app.init(main)
 clock = pygame.time.Clock()
 wait = 5000 # 5s
@@ -144,11 +145,8 @@ while not done:
 	# hass events grabber
 	now_tick = pygame.time.get_ticks();
 	if (now_tick - last_tick) >= wait:
-		print("Fetch")
 		HAE.update()
 		last_tick=now_tick
 
 
 	pygame.display.flip()
-
-print("Started")

@@ -99,12 +99,9 @@ class LightSwitch(gui.Switch):
 		pass
 	def set_hass_event(self,haevent):
 		self.haevent = haevent;
-		print(haevent)
 		if self.haevent.state == hasconst.STATE_OFF:
-			print("off")
 			self._value = False
 		elif self.haevent.state == hasconst.STATE_ON:
-			print("on")
 			self._value = True
 		self.repaint()
 	def update_hass_event(self):
@@ -113,3 +110,41 @@ class LightSwitch(gui.Switch):
 #		if self.haevent.state == hasconst.STATE_ON: img = self.style.down
 #		s.blit(img,(0,0))		
 
+class Header(gui.Button):
+	def __init__(self,name,**kwargs):
+		kwargs.setdefault("cls","header")
+		self.pcls = "down"
+		self.state = 1
+		super().__init__(name,**kwargs)
+
+	def event(self,e):
+
+		if e.type == ENTER: self.repaint()
+		elif e.type == EXIT: self.repaint()
+		elif e.type == FOCUS: self.repaint()
+		elif e.type == BLUR: self.repaint()
+		elif e.type == KEYDOWN:
+		    if e.key == K_SPACE or e.key == K_RETURN:
+		        self.state = 1
+		        self.repaint()
+		elif e.type == MOUSEBUTTONDOWN:
+		    self.state = 1
+		    self.repaint()
+		elif e.type == KEYUP:
+		    if self.state == 1:
+		        sub = pygame.event.Event(CLICK,{'pos':(0,0),'button':1})
+		        #self.send(sub.type,sub)
+		        self._event(sub)
+		        #self.event(sub)
+		        #self.click()
+
+		    #self.state = 0
+		    self.repaint()
+		elif e.type == MOUSEBUTTONUP:
+		    #self.state = 0
+		    self.repaint()
+		elif e.type == CLICK:
+		    self.click()
+		
+#		if self.haevent.state == hasconst.STATE_ON: img = self.style.down
+#		s.blit(img,(0,0))		
