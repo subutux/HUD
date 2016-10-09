@@ -40,7 +40,7 @@ class HAEventHandler(threading.Thread):
 		#TODO Fix this to determine what class to use
 		for msg in messages:
 			print(msg.data)
-			if hasattr(msg,"data") and msg.data != "ping":
+			if hasattr(msg,"data") and msg.data != "ping" and msg.event_type == "state_chanted":
 				print (json.loads(msg.data))
 				state = ha.State.from_dict(json.loads(msg.data))
 				if state.entity_id in self.callbacks:
