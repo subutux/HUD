@@ -3,6 +3,7 @@ import homeassistant.core as ha
 import threading
 import time
 import json
+import pprint
 from sseclient import SSEClient
 class HAEventHandler(threading.Thread):
 	"""
@@ -39,13 +40,16 @@ class HAEventHandler(threading.Thread):
 		messages = SSEClient(self.url)
 		#TODO Fix this to determine what class to use
 		for msg in messages:
-			print(msg.data)
-			if hasattr(msg,"data") and msg.data != "ping" and msg.event_type == "state_chanted":
-				print (json.loads(msg.data))
-				state = ha.State.from_dict(json.loads(msg.data))
-				if state.entity_id in self.callbacks:
-					for cb in self.callbacks[state.entity_id]:
-						cb(state)
+			if hasattr(msg,"data") and msg.data != "ping":
+				data = json.loads(msg.data)
+				pprint.pprint(data["event_type"])
+				if data["event_type"] == "state_changed":
+					print("STATE")
+					state = ha.State.from_dict(data["data"])
+					pprint.pprint ("State: {}".format(str(state)))
+					if state.entity_id in self.callbacks:
+						for cb in self.callbacks[state.entity_id]:
+							cb(state)
 
 
 	def stop(self):
