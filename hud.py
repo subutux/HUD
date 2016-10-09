@@ -65,7 +65,7 @@ except KeyError as e:
 # Setup home assistant connection
 
 hass = remote.API(haconfig['host'],haconfig['key'],haconfig['port'],haconfig['ssl'])
-HAE = HAEventHandler(hass)
+HAE = HAEventHandler(hass,settings=haconfig)
 try:
 	validation = remote.validate_api(hass)
 	if str(validation) != "ok":
