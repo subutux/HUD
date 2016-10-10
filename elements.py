@@ -77,9 +77,9 @@ class LightSwitch(gui.Switch):
 	def __init__(self,api,haevent,**kwargs):
 		self.api = api
 		self.haevent = None
-
+		print(kwargs["cls"])
 		super().__init__(value=False,**kwargs)
-
+		print(self.style.height)
 		self.connect(gui.CLICK,self.callback)
 		self.set_hass_event(haevent)
 	def callback(self):

@@ -91,7 +91,7 @@ for section in config.sections():
 	if section != "HomeAssistant":
 		c = gui.Table(width=320)
 		c.tr()
-		c.td(gui.Label(section))
+		c.td(gui.Label(section),cls="sectionlabel",align=-1)
 		
 		state = remote.get_state(hass,"group.{}".format(str(config[section]["group"])))
 		if state == None:
@@ -106,11 +106,20 @@ for section in config.sections():
 				if (entity.domain == "light"):
 					widget = gui.Table(width=320)
 					widget.tr()
-					l = elements.Light(hass,entity,width=300,height=20)
+					btn_cls = "button"
+					sw_heigth = 400
+					sw_cls = "switch"
+					if entity_id == entity_ids[-1]:
+						btn_cls += "_last"
+						sw_cls += "_last"
+						sw_heigth += 8
+					i = gui.Button(gui.Image("pgu.theme/icons/ic_lightbulb_outline_black_18dp.png"),cls=btn_cls,height=20,width=20)
+					widget.td(i)
+					l = elements.Light(hass,entity,cls=btn_cls,width=264,height=20)
 					HAE.add_listener(entity.entity_id,l.set_hass_event)
-					widget.td(l)
-					s = elements.LightSwitch(hass,entity,width=20,height=30)
-					widget.td(s)
+					widget.td(l,align=1)
+					s = elements.LightSwitch(hass,entity,cls=sw_cls)
+					widget.td(s,align=1)
 					HAE.add_listener(entity.entity_id,s.set_hass_event)
 					
 					c.td(widget)
