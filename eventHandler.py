@@ -17,9 +17,9 @@ class HAEventHandler(threading.Thread):
 		self._stopEvent = threading.Event()
 		self.settings = settings
 		if self.settings["ssl"]:
-			self.url="https://{}:{}/api/stream?api_password={}"
+			self.url="https://{}:{}/api/stream?api_password={}&restrict=state_changed"
 		else:
-			self.url="https://{}:{}/api/stream?api_password={}"
+			self.url="http://{}:{}/api/stream?api_password={}&restrict=state_changed"
 		self.url = self.url.format(self.settings["host"],self.settings["port"],self.settings["key"])
 		threading.Thread.__init__(self,group=group, target=target, name=name)
 
