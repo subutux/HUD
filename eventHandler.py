@@ -30,23 +30,20 @@ class HAEventHandler(threading.Thread):
 			cbs = []
 			cbs.append(callback)
 			self.callbacks[entity] = cbs
-	def update(self):
-		self.states = remote.get_states(self.api)
-		for state in self.states:
-			if state.entity_id in self.callbacks:
-				for cb in self.callbacks[state.entity_id]:
-					cb(state)
+			
+	def _handleEvent(self,msg):
+		if hasattr(msg,"data") and msg.data != "ping":
+			data = json.loads(msg.data)
+			if data["event_type"] == "state_changed":
+				state = ha.State.from_dict(data["data"]["new_state"])
+				if state.entity_id in self.callbacks:
+					for cb in self.callbacks[state.entity_id]:
+						cb(state)
+	
 	def run(self):
 		messages = SSEClient(self.url)
-		#TODO Fix this to determine what class to use
 		for msg in messages:
-			if hasattr(msg,"data") and msg.data != "ping":
-				data = json.loads(msg.data)
-				if data["event_type"] == "state_changed":
-					state = ha.State.from_dict(data["data"]["new_state"])
-					if state.entity_id in self.callbacks:
-						for cb in self.callbacks[state.entity_id]:
-							cb(state)
+			if not self._stopEvent.isSet(): self._handleEvent(msg)
 
 
 	def stop(self):
