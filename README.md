@@ -14,8 +14,19 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 * displaying group items
 * switching on/off of lights
 * displaying sensor data
+* Uses EventStream (`/api/stream`) for streaming updates
+* Cool
 
 ## Install instructions
+### Home Assistant
+
+Yes, you'll need to install Home Assistant. Don't worry you don't have to run it! We need it for its remote & core class.
+Just do:
+
+```bash
+pip3 install homeassistant
+```
+
 ### pygame on python3
 
 Currently, to my knownledge, there are no known packages pygame on python3
@@ -42,7 +53,7 @@ pip3 install .
 ```
 
 ### HUD
-place it somewhere.
+place it somewhere. Execute hud.py & enjoy!
 
 ## Configuration
 
