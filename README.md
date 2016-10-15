@@ -8,7 +8,7 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 & UI elements, I've tried to mimmick the web ui of home-assistant.
 
 ## Screenshot
-![images/screencast.png](images/screencast.png)
+![images/screencast.png](images/screencast.gif)
 
 ## features
 * displaying group items
