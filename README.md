@@ -70,7 +70,7 @@ SSL = False
 group=lichten_living
 ```
 
-The first one speeks for itself, home assistant configuration.
+The first one speaks for itself, home assistant configuration.
 
 The second one is a group definition. it needs an group entity name
 (for ex. if you have `group.lichten_living` enter `lichten_living`)
