@@ -104,25 +104,11 @@ for section in config.sections():
 				entity = remote.get_state(hass,entity_id)
 				# Changeable, lights are hmmMMmmm
 				if (entity.domain == "light"):
-					widget = gui.Table(width=320)
-					widget.tr()
-					btn_cls = "button"
-					sw_heigth = 400
-					sw_cls = "switch"
-					if entity_id == entity_ids[-1]:
-						btn_cls += "_last"
-						sw_cls += "_last"
-						sw_heigth += 8
-					i = gui.Button(gui.Image("pgu.theme/icons/ic_lightbulb_outline_black_18dp.png"),cls=btn_cls,height=20,width=20)
-					widget.td(i)
-					l = elements.Light(hass,entity,cls=btn_cls,width=264,height=20)
-					HAE.add_listener(entity.entity_id,l.set_hass_event)
-					widget.td(l,align=1)
-					s = elements.LightSwitch(hass,entity,cls=sw_cls)
-					widget.td(s,align=1)
-					HAE.add_listener(entity.entity_id,s.set_hass_event)
+					row = elements.rowLight(hass,entity,last=(True if entity_id == entity_ids[-1] else False))
 					
-					c.td(widget)
+					HAE.add_listener(entity.entity_id,row.set_hass_event)
+					
+					c.td(row.draw())
 				elif (entity.domain == "sensor"):
 					widget = gui.Label("{} : {}".format(str(entity.name),str(entity.state)))
 					c.td(widget)

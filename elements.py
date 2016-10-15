@@ -3,6 +3,7 @@ from pygame.locals import *
 from pgu.gui.const import *
 import homeassistant.remote as remote
 import homeassistant.const  as hasconst
+import icon_font_to_png
 import time
 class Light(gui.Button):
 	def __init__(self,api,haevent,**kwargs):
@@ -146,5 +147,36 @@ class Header(gui.Button):
 		elif e.type == CLICK:
 		    self.click()
 		
-#		if self.haevent.state == hasconst.STATE_ON: img = self.style.down
-#		s.blit(img,(0,0))		
+class mdiIcons(object):
+	def __init__(self,css_file,ttf_file):
+		self.icons = icon_font_to_png.IconFont(css_file,ttf_file,True);
+	def icon(self,iconName,size=32,color="black",scale="auto"):
+		file = "{}-HUD.png".format(iconName)
+		self.icons.export_icon(iconName,size,filename=file,export_dir="/tmp",color=color,scale=scale)
+		return gui.Image("{}/{}".format("/tmp",file))
+class rowLight(object):
+	def __init__(self,api,entity,last=False,width=320):
+		self.icons = mdiIcons("pgu.theme/mdi/materialdesignicons.css",
+									   "pgu.theme/mdi/materialdesignicons-webfont.ttf")
+		self.api = api
+		self.widget = gui.Table(width=width)
+		self.entity = entity
+		self.btn_cls = "button"
+		self.sw_cls = "switch"
+		self.ligth_width = (width-20)-36
+		if last:
+			self.btn_cls += "_last"
+			self.sw_cls += "_last"
+		self.iconButton = gui.Button(self.icons.icon('mdi-lightbulb-outline',16),cls=self.btn_cls,height=20,width=20)
+		self.light = Light(api,entity,cls=self.btn_cls,width=self.ligth_width,height=20)
+		self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
+	def set_hass_event(self,event):
+		self.light.set_hass_event(event)
+		self.switch.set_hass_event(event)
+	def draw(self):
+		self.widget.tr()
+		self.widget.td(self.iconButton)
+		self.widget.td(self.light)
+		self.widget.td(self.switch)
+		return self.widget
+
