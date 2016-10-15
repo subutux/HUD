@@ -79,3 +79,7 @@ HomeAssistant section.
 
 
 Enjoy!
+
+## Disclamer
+
+Don't look at the code, it's ugly! You're always welcome to post a pull request to make de code cleaner, or just give me some pointer. I love to learn more!
