@@ -91,8 +91,6 @@ for section in config.sections():
 	if section != "HomeAssistant":
 		c = gui.Table(width=320)
 		c.tr()
-		
-
 		state = remote.get_state(hass,"group.{}".format(str(config[section]["group"])))
 		print(state)
 		header = elements.rowHeader(hass,state)
@@ -118,6 +116,8 @@ for section in config.sections():
 					c.td(widget)
 		container.tr()
 		container.td(c)
+		container.tr()
+		container.td(gui.Spacer(height=4,width=320))
 
 main = gui.Container(width=320,height=600)
 header = elements.Header("Home Assistant",width=360,height=40)
@@ -125,31 +125,8 @@ header = elements.Header("Home Assistant",width=360,height=40)
 
 main.add(header,0,0)
 main.add(container,0,70)
-app.init(main)
+
 # Start the EventDaemon
 HAE.start()
-clock = pygame.time.Clock()
-wait = 5000 # 5s
-last_tick = 0
-done = False
-while not done:
-	for e in pygame.event.get():
-		if e.type is QUIT:
-			done = True
-			HAE.stop()
-		elif e.type is KEYDOWN and e.key == K_ESCAPE:
-			done = True
-			HAE.stop()
-		else:
-			app.event(e)
-	dt = clock.tick(30)/1000.0
-	app.paint()
-
-	# hass events grabber
-	# now_tick = pygame.time.get_ticks();
-	# if (now_tick - last_tick) >= wait:
-	# 	HAE.update()
-	# 	last_tick=now_tick
-
-
-	pygame.display.flip()
+app.run(main)
+HAE.stop()
