@@ -86,11 +86,12 @@ class LightSwitch(gui.Switch):
 	def callback(self):
 		print('callback')
 		if self.haevent.state == hasconst.STATE_OFF:
-			status = remote.call_service(self.api,self.haevent.domain,'turn_on',{
+
+			status = remote.call_service(self.api,"homeassistant",'turn_on',{
 				'entity_id': self.haevent.entity_id
 				})
 		else:
-			status = remote.call_service(self.api,self.haevent.domain,'turn_off',{
+			status = remote.call_service(self.api,"homeassistant",'turn_off',{
 				'entity_id': self.haevent.entity_id
 				})
 		print (status);
@@ -159,24 +160,39 @@ class rowLight(object):
 		self.icons = mdiIcons("pgu.theme/mdi/materialdesignicons.css",
 									   "pgu.theme/mdi/materialdesignicons-webfont.ttf")
 		self.api = api
+		self.width = width
 		self.widget = gui.Table(width=width)
 		self.entity = entity
 		self.btn_cls = "button"
 		self.sw_cls = "switch"
 		self.ligth_width = (width-20)-36
+		self.icon = 'mdi-lightbulb-outline'
 		if last:
 			self.btn_cls += "_last"
 			self.sw_cls += "_last"
-		self.iconButton = gui.Button(self.icons.icon('mdi-lightbulb-outline',16),cls=self.btn_cls,height=20,width=20)
-		self.light = Light(api,entity,cls=self.btn_cls,width=self.ligth_width,height=20)
-		self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
 	def set_hass_event(self,event):
 		self.light.set_hass_event(event)
 		self.switch.set_hass_event(event)
 	def draw(self):
+		if self.icon:
+			self.iconButton = gui.Button(self.icons.icon(self.icon,16),cls=self.btn_cls,height=20,width=20)
+		else:
+			self.ligth_width = self.width - 20
+		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=self.ligth_width,height=20)
+		self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
 		self.widget.tr()
-		self.widget.td(self.iconButton)
+		if self.icon:
+			self.widget.td(self.iconButton)
 		self.widget.td(self.light)
 		self.widget.td(self.switch)
 		return self.widget
 
+class rowHeader(rowLight):
+	def __init__(self,api,entity,width=320):
+		self.width=width
+		super().__init__(api,entity,last=False,width=width)
+		self.icon = None
+		self.btn_cls = "button_header"
+
+
+		

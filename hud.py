@@ -91,9 +91,13 @@ for section in config.sections():
 	if section != "HomeAssistant":
 		c = gui.Table(width=320)
 		c.tr()
-		c.td(gui.Label(section),cls="sectionlabel",align=-1)
 		
+
 		state = remote.get_state(hass,"group.{}".format(str(config[section]["group"])))
+		print(state)
+		header = elements.rowHeader(hass,state)
+		HAE.add_listener(state.entity_id,header.set_hass_event)
+		c.td(header.draw())
 		if state == None:
 			c.tr()
 			c.td(gui.Label("Unable to find group.{}".format(str(config[section]["group"]))))
