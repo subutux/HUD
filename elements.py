@@ -191,17 +191,17 @@ class sensorValue(gui.Button):
 	def __init__(self,api,haevent,**kwargs):
 		self.api = api
 		self.haevent = None
-		self.sValue = haevent.state
-		if "unit_of_measurement" in haevent.attributes:
-			self.sValue += " {}".format(haevent.attributes["unit_of_measurement"])
-		super().__init__(self.sValue,**kwargs)
-
+		super().__init__("",**kwargs)
 		self.set_hass_event(haevent)
 
 
 	def set_hass_event(self,haevent):
-		self.haevent = haevent;
-		self.repaint()
+		print("Change")
+		self.haevent = haevent
+		self.sValue = haevent.state
+		if "unit_of_measurement" in haevent.attributes:
+			self.sValue += " {}".format(haevent.attributes["unit_of_measurement"])
+		self.value = self.sValue
 	def event(self,e):
 		pass
 
@@ -233,7 +233,8 @@ class rowLight(object):
 			self.sw_cls += "_last"
 	def set_hass_event(self,event):
 		self.light.set_hass_event(event)
-		self.switch.set_hass_event(event)
+		if self.entity.state != "unknown":
+			self.switch.set_hass_event(event)
 
 	def draw(self):
 		if self.icon:
@@ -241,7 +242,10 @@ class rowLight(object):
 		else:
 			self.ligth_width = self.width - 20
 		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=self.ligth_width,height=20)
-		self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
+		if self.entity.state != "unknown":
+			self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
+		else:
+			self.switch= gui.Button("",cls=self.btn_cls,width=20,height=20)
 		self.widget.tr()
 		if self.icon:
 			self.widget.td(self.iconButton)
@@ -289,3 +293,4 @@ class rowHeader(rowLight):
 		super().__init__(api,entity,last=False,width=width)
 		self.icon = None
 		self.btn_cls = "button_header"
+
