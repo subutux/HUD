@@ -132,5 +132,11 @@ main.add(container,0,70)
 
 # Start the EventDaemon
 HAE.start()
-app.run(main)
+while True:
+	try:
+		app.run(main)
+	except AttributeError as e:
+		print ("AttributeError, restarting")
+		pass
+
 HAE.stop()
