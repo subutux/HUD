@@ -104,20 +104,20 @@ for section in config.sections():
 			for entity_id in entity_ids:
 				c.tr()
 				entity = remote.get_state(hass,entity_id)
-				# Changeable, lights are hmmMMmmm
-				if (entity.domain == "light"):
-					row = elements.rowLight(hass,entity,last=(True if entity_id == entity_ids[-1] else False))
-					
-					HAE.add_listener(entity.entity_id,row.set_hass_event)
-					
-					c.td(row.draw())
-				elif (entity.domain == "sensor"):
-					print(entity.as_dict())
-					# widget = gui.Label("{} : {}".format(str(entity.name),str(entity.state)))
-					# c.td(widget)
-					row = elements.rowSensor(hass,entity,last=(True if entity_id == entity_ids[-1] else False))
-					HAE.add_listener(entity.entity_id,row.set_hass_event)
-					c.td(row.draw())
+				if entity != None:
+					# Changeable, lights are hmmMMmmm
+					if (entity.domain == "light"):
+						row = elements.rowLight(hass,entity,last=(True if entity_id == entity_ids[-1] else False))
+						
+						HAE.add_listener(entity.entity_id,row.set_hass_event)
+						
+						c.td(row.draw())
+					elif (entity.domain == "sensor"):
+						# widget = gui.Label("{} : {}".format(str(entity.name),str(entity.state)))
+						# c.td(widget)
+						row = elements.rowSensor(hass,entity,last=(True if entity_id == entity_ids[-1] else False))
+						HAE.add_listener(entity.entity_id,row.set_hass_event)
+						c.td(row.draw())
 		container.tr()
 		container.td(c)
 		container.tr()
