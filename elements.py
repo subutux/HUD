@@ -5,6 +5,7 @@ import homeassistant.remote as remote
 import homeassistant.const  as hasconst
 import icon_font_to_png
 import time
+import os.path
 class Light(gui.Button):
 	def __init__(self,api,haevent,**kwargs):
 		self.api = api
@@ -149,10 +150,34 @@ class Header(gui.Button):
 		    self.click()
 		
 class mdiIcons(object):
+	"""
+	Class for easy converting font icon to a gui.Image
+	"""
 	def __init__(self,css_file,ttf_file):
+		"""
+		
+		@css_file the css file of the webfont
+
+		@ttf_file the font file of the webfont
+		"""
 		self.icons = icon_font_to_png.IconFont(css_file,ttf_file,True);
-	def icon(self,iconName,size=32,color="black",scale="auto"):
-		file = "{}-HUD.png".format(iconName)
+	def icon(self,iconName,size=16,color="black",scale="auto"):
+		"""
+		get a gui.Image from the icon font
+
+		@iconName the css name of the icon
+				  Note: homeAssistant uses a mdi: prefix & is converted
+				  		to our prefix
+		@size the icon size in px (w=h), default 16
+		@color the color of the icon you want, default black
+		@scale the scaling to use, default auto
+		"""
+		if iconName.startswith("mdi:"):
+			iconName = iconName.replace('mdi:','mdi-',1)
+		file = "{}-x{}-c{}-s{}-HUD.png".format(iconName,str(size),color,str(scale))
+		# if we find a file in the tmp folder, use that
+		if os.path.isfile("{}/{}".format("/tmp",iconName)):
+			return gui.Image("{}/{}".format("/tmp",iconName))
 		self.icons.export_icon(iconName,size,filename=file,export_dir="/tmp",color=color,scale=scale)
 		return gui.Image("{}/{}".format("/tmp",file))
 class rowLight(object):
@@ -166,7 +191,7 @@ class rowLight(object):
 		self.btn_cls = "button"
 		self.sw_cls = "switch"
 		self.ligth_width = (width-20)-36
-		self.icon = 'mdi-lightbulb-outline'
+		self.icon = 'mdi-lightbulb'
 		if last:
 			self.btn_cls += "_last"
 			self.sw_cls += "_last"
@@ -175,7 +200,7 @@ class rowLight(object):
 		self.switch.set_hass_event(event)
 	def draw(self):
 		if self.icon:
-			self.iconButton = gui.Button(self.icons.icon(self.icon,16),cls=self.btn_cls,height=20,width=20)
+			self.iconButton = gui.Button(self.icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=20)
 		else:
 			self.ligth_width = self.width - 20
 		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=self.ligth_width,height=20)
