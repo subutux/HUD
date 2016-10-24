@@ -54,7 +54,7 @@ class Light(gui.Button):
 		self.connect(gui.CLICK,self.callback)
 
 	def callback(self):
-		print('callback')
+		
 		if self.haevent.state == hasconst.STATE_OFF:
 			status = remote.call_service(self.api,self.haevent.domain,'turn_on',{
 				'entity_id': self.haevent.entity_id
@@ -63,19 +63,19 @@ class Light(gui.Button):
 			status = remote.call_service(self.api,self.haevent.domain,'turn_off',{
 				'entity_id': self.haevent.entity_id
 				})
-		print (status);
+		
 		# TODO: Fix time
 		self.set_hass_event(remote.get_state(self.api,self.haevent.entity_id))
 
 	def set_hass_event(self,haevent):
 		self.haevent = haevent;
-		print(haevent)
+		
 		if self.haevent.state == hasconst.STATE_OFF:
-			print("off")
+			
 			self.state = 0
 			self.pcls = ""
 		elif self.haevent.state == hasconst.STATE_ON:
-			print("on")
+			
 			self.state = 1
 			self.pcls = "down"
 		self.repaint()
@@ -117,13 +117,13 @@ class LightSwitch(gui.Switch):
 	def __init__(self,api,haevent,**kwargs):
 		self.api = api
 		self.haevent = None
-		print(kwargs["cls"])
+		
 		super().__init__(value=False,**kwargs)
-		print(self.style.height)
+		
 		self.connect(gui.CLICK,self.callback)
 		self.set_hass_event(haevent)
 	def callback(self):
-		print('callback')
+		
 		if self.haevent.state == hasconst.STATE_OFF:
 
 			status = remote.call_service(self.api,"homeassistant",'turn_on',{
@@ -133,7 +133,7 @@ class LightSwitch(gui.Switch):
 			status = remote.call_service(self.api,"homeassistant",'turn_off',{
 				'entity_id': self.haevent.entity_id
 				})
-		print (status);
+		
 		# TODO: Fix time
 		self.update_hass_event()
 	def click(self):
@@ -196,7 +196,7 @@ class sensorValue(gui.Button):
 
 
 	def set_hass_event(self,haevent):
-		print("Change")
+		
 		self.haevent = haevent
 		self.sValue = haevent.state
 		if "unit_of_measurement" in haevent.attributes:
@@ -216,18 +216,19 @@ class eventLabel(gui.Label):
 		self.repaint()
 	
 class rowLight(object):
-	def __init__(self,api,entity,last=False,width=320):
+	def __init__(self,api,entity,last=False,width=320,table=None):
 		self.icons = mdiIcons("pgu.theme/mdi/materialdesignicons.css",
 									   "pgu.theme/mdi/materialdesignicons-webfont.ttf")
 		self.api = api
 		self.width = width
-		self.widget = gui.Table(width=width)
+		#self.widget = gui.Table(width=width) if table == None else table
+		self.widget = gui.Container(height=20,width=320,align=-1,valign=-1,background=(220, 220, 220))
 		self.entity = entity
 		self.btn_cls = "button"
 		self.sw_cls = "switch"
-		self.ligth_width = (width-20)-36
+		self.ligth_width = (width-36)-36
 		self.icon = 'mdi-lightbulb'
-		print("entity")
+		
 		if last:
 			self.btn_cls += "_last"
 			self.sw_cls += "_last"
@@ -241,16 +242,17 @@ class rowLight(object):
 			self.iconButton = gui.Button(self.icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=20)
 		else:
 			self.ligth_width = self.width - 20
-		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=self.ligth_width,height=20)
+		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=238,height=20)
 		if self.entity.state != "unknown":
 			self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
 		else:
 			self.switch= gui.Button("",cls=self.btn_cls,width=20,height=20)
-		self.widget.tr()
+		#self.widget.tr()
 		if self.icon:
-			self.widget.td(self.iconButton)
-		self.widget.td(self.light)
-		self.widget.td(self.switch)
+			#self.widget.td(self.iconButton)
+			self.widget.add(self.iconButton,0,0)
+		self.widget.add(self.light,36,0)
+		self.widget.add(self.switch,self.width-36,0)
 		return self.widget
 
 class rowSensor(object):
@@ -279,7 +281,7 @@ class rowSensor(object):
 		else:
 			self.ligth_width = self.width - 20
 		self.state = sensorValue(self.api,self.entity,cls=self.sw_cls,width=100,height=20)
-		print(self.state.style.width)
+		
 		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=(self.width-33-self.state.style.width),height=20)
 		self.widget.tr()
 		self.widget.td(self.iconButton)
@@ -288,9 +290,9 @@ class rowSensor(object):
 		return self.widget
 
 class rowHeader(rowLight):
-	def __init__(self,api,entity,width=320):
+	def __init__(self,api,entity,width=320,table=None):
 		self.width=width
-		super().__init__(api,entity,last=False,width=width)
+		super().__init__(api,entity,last=False,width=width,table=table)
 		self.icon = None
 		self.btn_cls = "button_header"
 

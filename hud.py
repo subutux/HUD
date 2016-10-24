@@ -76,7 +76,7 @@ except Exception as e:
 	exit(1)
 
 
-screen = pygame.display.set_mode((350,600),SWSURFACE)
+screen = pygame.display.set_mode((320,480),SWSURFACE)
 
 # For now, only use our "Light" section
 
@@ -85,46 +85,44 @@ screen = pygame.display.set_mode((350,600),SWSURFACE)
 app = gui.Desktop(theme=gui.Theme("./pgu.theme"))
 app.connect(gui.QUIT,app.quit,None)
 
-container=gui.Table(width=230)
+container=gui.Table(width=230,vpadding=0, hpadding=0)
 
 for section in config.sections():
 	if section != "HomeAssistant":
-		c = gui.Table(width=320)
+		c = container
 		c.tr()
 		state = remote.get_state(hass,"group.{}".format(str(config[section]["group"])))
-		print(state)
-		header = elements.rowHeader(hass,state)
+		header = elements.rowHeader(hass,state,table=c)
 		HAE.add_listener(state.entity_id,header.set_hass_event)
 		c.td(header.draw())
 		if state == None:
 			c.tr()
 			c.td(gui.Label("Unable to find group.{}".format(str(config[section]["group"]))))
 		else:
-			entity_ids = state.attributes['entity_id']
-			for entity_id in entity_ids:
+			# get all states from entities & add to the list if entity is not None (eg. not found)
+			entities =  [e for e in [remote.get_state(hass,eid) for eid in state.attributes['entity_id']] if e != None]
+			for entity in entities:
 				c.tr()
-				entity = remote.get_state(hass,entity_id)
-				if entity != None:
-					# Changeable, lights are hmmMMmmm
-					if (entity.domain == "light"):
-						row = elements.rowLight(hass,entity,last=(True if entity_id == entity_ids[-1] else False))
-						
-						HAE.add_listener(entity.entity_id,row.set_hass_event)
-						
-						c.td(row.draw())
-					elif (entity.domain == "sensor"):
-						# widget = gui.Label("{} : {}".format(str(entity.name),str(entity.state)))
-						# c.td(widget)
-						row = elements.rowSensor(hass,entity,last=(True if entity_id == entity_ids[-1] else False))
-						HAE.add_listener(entity.entity_id,row.set_hass_event)
-						c.td(row.draw())
-		container.tr()
-		container.td(c)
-		container.tr()
+				# Changeable, lights are hmmMMmmm
+				if (entity.domain == "light"):
+					row = elements.rowLight(hass,entity,last=(True if entity == entities[-1] else False),table=c)
+					
+					HAE.add_listener(entity.entity_id,row.set_hass_event)
+					 #row.draw()
+					c.td(row.draw(),align=-1)
+				elif (entity.domain == "sensor"):
+					# widget = gui.Label("{} : {}".format(str(entity.name),str(entity.state)))
+					# c.td(widget)
+					row = elements.rowSensor(hass,entity,last=(True if entity == entities[-1] else False))
+					HAE.add_listener(entity.entity_id,row.set_hass_event)
+					c.td(row.draw())
+		#container.tr()
+		#container.td(c)
+		#container.tr()
 		container.td(gui.Spacer(height=4,width=320))
 
-main = gui.Container(width=320,height=600)
-header = elements.Header("Home Assistant",width=360,height=40)
+main = gui.Container(width=320,height=480)
+header = elements.Header("Home Assistant",width=320,height=40)
 
 
 main.add(header,0,0)
@@ -134,7 +132,7 @@ main.add(container,0,70)
 HAE.start()
 while True:
 	try:
-		app.run(main)
+		app.run(main,screen=screen )
 	except AttributeError as e:
 		print ("AttributeError, restarting")
 		pass
