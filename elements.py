@@ -263,7 +263,7 @@ class rowSensor(object):
 		self.btn_cls = "button"
 		self.sw_cls = "sensor"
 		
-		self.ligth_width = (width-36)
+		self.light_width = (width-36)
 		#                          |   
 		#                          |   
 		#                          +----> Switch size
@@ -284,11 +284,12 @@ class rowSensor(object):
 		else:
 			self.iconButton = gui.Button(" ",cls=self.btn_cls,height=20,width=36)
 		self.state = sensorValue(self.api,self.entity,cls=self.sw_cls,height=20)
-		
-		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=(self.light_width-self.state.style.width),height=20)
+		stateWidth = self.state._value.style.width + self.state.style.padding_left + self.state.style.padding_right
+		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=(self.light_width-stateWidth),height=20)
 		self.widget.add(self.iconButton,0,0)
 		self.widget.add(self.light,36,0)
-		self.widget.add(self.state,self.width-36,0)
+		print("Width state = {}".format(str(self.state._value.style.width)))
+		self.widget.add(self.state,self.width-stateWidth,0)
 		return self.widget
 
 class rowHeader(rowLight):

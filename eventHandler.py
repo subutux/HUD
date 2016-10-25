@@ -3,7 +3,9 @@ import homeassistant.core as ha
 import threading
 import time
 import json
-import pprint
+import logging
+log = logging.getLogger('HUD.HAEventHandler')
+log.addHandler(logging.NullHandler())
 from sseclient import SSEClient
 class HAEventHandler(threading.Thread):
 	"""
@@ -38,6 +40,7 @@ class HAEventHandler(threading.Thread):
 				state = ha.State.from_dict(data["data"]["new_state"])
 				if state.entity_id in self.callbacks:
 					for cb in self.callbacks[state.entity_id]:
+						log.info("Event: {}".format(str(state)))
 						cb(state)
 	
 	def run(self):
