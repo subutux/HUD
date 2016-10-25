@@ -259,11 +259,16 @@ class rowSensor(object):
 	def __init__(self,api,entity,last=False,width=320):
 		self.api = api
 		self.width = width
-		self.widget = gui.Table(width=width)
+		#self.widget = gui.Table(width=width)
+		self.widget = gui.Container(height=20,width=self.width,align=-1,valign=-1,background=(220,220,220))
 		self.entity = entity
 		self.btn_cls = "button"
 		self.sw_cls = "sensor"
-		self.ligth_width = (width-20)-36
+		
+		self.ligth_width = (width-36)
+		#                          |   
+		#                          |   
+		#                          +----> Icon size
 		if "icon" in entity.attributes:
 			self.icon = entity.attributes["icon"]
 		else:
@@ -277,16 +282,15 @@ class rowSensor(object):
 
 	def draw(self):
 		if self.icon:
-			self.iconButton = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=20)
+			self.iconButton = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=36)
 		else:
-			self.ligth_width = self.width - 20
-		self.state = sensorValue(self.api,self.entity,cls=self.sw_cls,width=100,height=20)
+			self.iconButton = gui.Button(" ",cls=self.btn_cls,height=20,width=36)
+		self.state = sensorValue(self.api,self.entity,cls=self.sw_cls,height=20)
 		
-		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=(self.width-33-self.state.style.width),height=20)
-		self.widget.tr()
-		self.widget.td(self.iconButton)
-		self.widget.td(self.light)
-		self.widget.td(self.state)
+		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=(self.light_width-self.state.style.width),height=20)
+		self.widget.add(self.iconButton,0,0)
+		self.widget.add(self.light,36,0)
+		self.widget.add(self.state,self.width-36,0)
 		return self.widget
 
 class rowHeader(rowLight):
