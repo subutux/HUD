@@ -95,14 +95,15 @@ for section in config.sections():
 		header = elements.rowHeader(hass,state,table=c)
 		HAE.add_listener(state.entity_id,header.set_hass_event)
 		c.td(header.draw(),align=-1)
+		c.tr()
 		if state == None:
-			c.tr()
+			
 			c.td(gui.Label("Unable to find group.{}".format(str(config[section]["group"]))))
 		else:
 			# get all states from entities & add to the list if entity is not None (eg. not found)
 			entities =  [e for e in [remote.get_state(hass,eid) for eid in state.attributes['entity_id']] if e != None]
 			for entity in entities:
-				c.tr()
+				
 				# Changeable, lights are hmmMMmmm
 				if (entity.domain == "light"):
 					row = elements.rowLight(hass,entity,last=(True if entity == entities[-1] else False),table=c)
@@ -116,9 +117,8 @@ for section in config.sections():
 					row = elements.rowSensor(hass,entity,last=(True if entity == entities[-1] else False))
 					HAE.add_listener(entity.entity_id,row.set_hass_event)
 					c.td(row.draw(),align=-1)
-		#container.tr()
-		#container.td(c)
-		#container.tr()
+				c.tr()
+
 		container.td(gui.Spacer(height=4,width=320))
 
 main = gui.Container(width=320,height=480)
