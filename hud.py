@@ -94,7 +94,7 @@ for section in config.sections():
 		state = remote.get_state(hass,"group.{}".format(str(config[section]["group"])))
 		header = elements.rowHeader(hass,state,table=c)
 		HAE.add_listener(state.entity_id,header.set_hass_event)
-		c.td(header.draw())
+		c.td(header.draw(),align=-1)
 		if state == None:
 			c.tr()
 			c.td(gui.Label("Unable to find group.{}".format(str(config[section]["group"]))))
@@ -115,7 +115,7 @@ for section in config.sections():
 					# c.td(widget)
 					row = elements.rowSensor(hass,entity,last=(True if entity == entities[-1] else False))
 					HAE.add_listener(entity.entity_id,row.set_hass_event)
-					c.td(row.draw())
+					c.td(row.draw(),align=-1)
 		#container.tr()
 		#container.td(c)
 		#container.tr()
@@ -126,7 +126,7 @@ header = elements.Header("Home Assistant",width=320,height=40)
 
 
 main.add(header,0,0)
-main.add(container,0,70)
+main.add(container,0,50)
 
 # Start the EventDaemon
 HAE.start()
