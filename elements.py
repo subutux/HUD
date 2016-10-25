@@ -239,18 +239,16 @@ class rowLight(object):
 
 	def draw(self):
 		if self.icon:
-			self.iconButton = gui.Button(self.icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=20)
+			self.iconButton = gui.Button(self.icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=36)
 		else:
-			self.ligth_width = self.width - 20
+			self.iconButton = gui.Button(" ",cls=self.btn_cls,height=20,width=36)
 		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=238,height=20)
 		if self.entity.state != "unknown":
 			self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
 		else:
 			self.switch= gui.Button("",cls=self.btn_cls,width=20,height=20)
-		#self.widget.tr()
-		if self.icon:
-			#self.widget.td(self.iconButton)
-			self.widget.add(self.iconButton,0,0)
+
+		self.widget.add(self.iconButton,0,0)
 		self.widget.add(self.light,36,0)
 		self.widget.add(self.switch,self.width-36,0)
 		return self.widget
@@ -268,7 +266,7 @@ class rowSensor(object):
 		self.ligth_width = (width-36)
 		#                          |   
 		#                          |   
-		#                          +----> Icon size
+		#                          +----> Switch size
 		if "icon" in entity.attributes:
 			self.icon = entity.attributes["icon"]
 		else:
