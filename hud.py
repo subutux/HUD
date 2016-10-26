@@ -124,7 +124,7 @@ for section in config.sections():
 			log.warning("Startup: Unable to find group.{}".format(str(config[section]["group"])))
 			c.td(gui.Label("Startup: Unable to find group.{}".format(str(config[section]["group"]))))
 		else:
-			log.info("Startup: Fetching entity statusses".format(str(section)))
+			log.info("Startup: Fetching entity statusses")
 			# get all states from entities & add to the list if entity is not None (eg. not found)
 			entities =  [e for e in [remote.get_state(hass,eid) for eid in state.attributes['entity_id']] if e != None]
 			for entity in entities:
