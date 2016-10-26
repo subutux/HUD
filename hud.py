@@ -91,8 +91,13 @@ if args.touchscreen:
 	log.info("Startup: Setting up touchscreen support")
 	os.putenv('SDL_MOUSEDRV'   , 'TSLIB')
 	os.putenv('SDL_MOUSEDEV' , args.touchscreen)
-
-screen = pygame.display.set_mode((320,480),SWSURFACE)
+	
+if args.framebuffer:
+	pygame_opts = FULLSCREEN | HWSURFACE | DOUBLEBUF
+	#                         ^UNTESTED!^
+else:
+	pygame_opts = SWSURFACE
+screen = pygame.display.set_mode((320,480),flags=pygame_opts)
 
 if args.touchscreen:
 	## Hide the mouse cursor if we have a touchscreen
