@@ -157,8 +157,9 @@ while RunPlease:
 		log.info("Start screen")
 		app.run(main,screen=screen )
 	except (KeyboardInterrupt, SystemExit):
-		log.warning("Got Exit ore Ctrl-C. Stopping.")
+		log.warning("Got Exit or Ctrl-C. Stopping.")
 		RunPlease = False
+		pass
 	except AttributeError as e:
 		log.error("AttributeError, restarting")
 		pass
