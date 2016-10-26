@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+from eventHandler import HAEventHandler
+import os, sys
+import argparse
+import configparser
+import logging
+p = argparse.ArgumentParser(description="A pygame GUI for Home Assistant.")
+p_config = p.add_argument_group('Configuration')
+p_config.add_argument('-c','--config',help="config file to use",required=True,type=argparse.FileType('r'))
+p_config.add_argument('-f','--framebuffer',help="Use this framebuffer as output for the UI (defaults to window mode)",
+											default=None,type=str,metavar="/dev/fbX")
+p_config.add_argument('-t','--touchscreen',help="Enable touchscreen integration. Use this as event input",
+											default=None,type=str,metavar="/dev/input/eventX")
+p_homeassistant = p.add_argument_group('HomeAssistant'," (optional) Parameters to override the config file")
+p_homeassistant.add_argument('-H','--homeassistant',default=None,help="The location of home-assistant",metavar="host.name")
+p_homeassistant.add_argument('-p','--port',default=None,help="the port to use for home-assistant (default: 8123)",type=int)
+p_homeassistant.add_argument('-k','--key',default=None,help="The api password to use (default: None)",type=str)
+p_homeassistant.add_argument('-s','--ssl',help="Use ssl (default false)",default=False,action="store_true")
+p_logging = p.add_argument_group('Logging'," (optional) Logging settings")
+p_logging.add_argument('-v','--verbose',help="Log output",default=False,action="store_true")
+p_logging.add_argument('-L','--logLevel',dest="logLevel",help="Log level to use (default: ERROR)",choices=["INFO","WARNING","ERROR","CRITICAL","DEBUG"],default="ERROR",type=str)
+p_logging.add_argument('-l','--logfile',help="Instead of logging to stdout, log to this file",default=None)
+args = p.parse_args();
 try:
 	import homeassistant.remote as remote
 except:
@@ -16,22 +38,6 @@ except:
 	print("Unable to import pgu.gui! (See the readme for installing pgu)")
 
 import elements
-from eventHandler import HAEventHandler
-import sys
-import argparse
-import configparser
-import logging
-p = argparse.ArgumentParser()
-
-p.add_argument('-c','--config',help="config file to use",required=True,type=argparse.FileType('r'))
-p.add_argument('-H','--homeassistant',default=None,help="The location of home-assistant")
-p.add_argument('-p','--port',default=None,help="the port to use for home-assistant (default: 8123)",type=int)
-p.add_argument('-k','--key',default=None,help="The api password to use (default: None)",type=str)
-p.add_argument('-s','--ssl',help="Use ssl (default false)",default=False,action="store_true")
-p.add_argument('-v','--verbose',help="Log output",default=False,action="store_true")
-p.add_argument('-L','--logLevel',dest="logLevel",help="Log level to use (default: ERROR)",choices=["INFO","WARNING","ERROR","CRITICAL","DEBUG"],default="ERROR",type=str)
-p.add_argument('-l','--logfile',help="Instead of logging to stdout, log to this file",default=None)
-args = p.parse_args();
 
 # Setup logger
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)s:%(name)s] [%(levelname)-5.5s]  %(message)s")
@@ -59,7 +65,7 @@ try:
 		"key": (args.key if args.key else config["HomeAssistant"]["Password"])
 	}
 except KeyError as e:
-	print ("Cannot find section [{}] in config file '{}'!".format(str(e),str(args.config.name)))
+	log.error("Cannot find section [{}] in config file '{}'!".format(str(e),str(args.config.name)))
 	exit(1)
 
 # Setup home assistant connection
@@ -73,15 +79,26 @@ try:
 		raise Exception(validation)
 
 except Exception as e:
-	print ("hass connection verification failed: {}".format(str(validation)))
+	log.error("hass connection verification failed: {}".format(str(validation)))
 	exit(1)
 
 log.info("Startup: Setting screen")
+if args.framebuffer:
+	log.info("Startup: Setting framebuffer")
+	os.putenv('SDL_VIDEODRIVER', 'fbcon')
+	os.putenv('SDL_FBDEV'      , args.framebuffer)
+if args.touchscreen:
+	log.info("Startup: Setting up touchscreen support")
+	os.putenv('SDL_MOUSEDRV'   , 'TSLIB')
+	os.putenv('SDL_MOUSEDEV' , args.touchscreen)
+
 screen = pygame.display.set_mode((320,480),SWSURFACE)
 
-# For now, only use our "Light" section
+if args.touchscreen:
+	## Hide the mouse cursor if we have a touchscreen
+	pygame.mouse.set_visible(False)
 
-# try to get the state of the entity
+
 log.info("Startup: Load Theme")
 app = gui.Desktop(theme=gui.Theme("./pgu.theme"))
 app.connect(gui.QUIT,app.quit,None)
@@ -134,10 +151,14 @@ main.add(container,0,60)
 # Start the EventDaemon
 log.info("Startup: start HAEventHandler")
 HAE.start()
-while True:
+RunPlease = True
+while RunPlease:
 	try:
 		log.info("Start screen")
 		app.run(main,screen=screen )
+	except (KeyboardInterrupt, SystemExit):
+		log.warning("Got Exit ore Ctrl-C. Stopping.")
+		RunPlease = False
 	except AttributeError as e:
 		log.error("AttributeError, restarting")
 		pass
