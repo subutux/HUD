@@ -6,7 +6,7 @@ import homeassistant.const  as hasconst
 import icon_font_to_png
 import time
 import os.path
-
+whereami = os.path.dirname(os.path.realpath(__file__))
 class mdiIcons(object):
 	"""
 	Class for easy converting font icon to a gui.Image
@@ -40,8 +40,8 @@ class mdiIcons(object):
 		return gui.Image("{}/{}".format("/tmp",file))
 
 
-icons = mdiIcons("pgu.theme/mdi/materialdesignicons.css",
-									   "pgu.theme/mdi/materialdesignicons-webfont.ttf")
+icons = mdiIcons(whereami+"/pgu.theme/mdi/materialdesignicons.css",
+									   whereami+"/pgu.theme/mdi/materialdesignicons-webfont.ttf")
 		
 
 class Light(gui.Button):
@@ -217,8 +217,6 @@ class eventLabel(gui.Label):
 	
 class rowLight(object):
 	def __init__(self,api,entity,last=False,width=320,table=None):
-		self.icons = mdiIcons("pgu.theme/mdi/materialdesignicons.css",
-									   "pgu.theme/mdi/materialdesignicons-webfont.ttf")
 		self.api = api
 		self.width = width
 		#self.widget = gui.Table(width=width) if table == None else table
@@ -239,7 +237,7 @@ class rowLight(object):
 
 	def draw(self):
 		if self.icon:
-			self.iconButton = gui.Button(self.icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=36)
+			self.iconButton = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=36)
 		else:
 			self.iconButton = gui.Button(" ",cls=self.btn_cls,height=20,width=36)
 		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=238,height=20)
