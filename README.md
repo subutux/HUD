@@ -8,7 +8,8 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 & UI elements, I've tried to mimmick the web ui of home-assistant.
 
 ## Screenshot
-![images/screencast.png](images/screencast.gif) ![images/touchscreen.gif](images/touchscreen.gif)
+![images/screencast.png](images/screencast.gif)
+![images/touchscreen.gif](images/touchscreen.gif)
 
 ## features
 * displaying group items
@@ -18,43 +19,20 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 * Using `icon_font_to_png` to use the Material Design Icon font on the fly.
 * Cool
 
-## Install instructions
-### Home Assistant
-
-Yes, you'll need to install Home Assistant. Don't worry you don't have to run it! We need it for its remote & core class.
-Just do:
-
+## Install
 ```bash
-pip3 install homeassistant
+pip3 install --process-dependency-links .
 ```
+### Why `--process-dependency-links`
 
-### pygame on python3
+To my knowledge, there are no packages for `pygame` and `pgu` in PyPi for
+python3.
 
-Currently, to my knownledge, there are no known packages pygame on python3
+This option uses the `dependency_links` in `setup.py` for getting the tar.gz
+files from their repos. It's nasty, I know. Can't help it!
 
-You'll have to compile pygame(1.9.2) from source. Luckly, this isn't that hard.
 
-```bash
-# install these packages for ubuntu/debian
-sudo apt install python3-pip python3-dev libsdl-image1.2-dev libsdl-mixer1.2-dev  libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev python-numpy subversion  libportmidi-dev
-# clone using mercury
-hg clone https://bitbucket.org/pygame/pygame
-cd pygame
-pip3 install .
-```
-
-### pgu on python3
-
-See above, install from source
-```bash
-# get the source from github
-git clone https://github.com/parogers/pgu
-cd pgu
-pip3 install .
-```
-
-### HUD
-place it somewhere. Execute hud.py & enjoy!
+Side note: The raspberry pi repos contain a pygame package for python3!
 
 ## Configuration
 
@@ -82,4 +60,5 @@ Enjoy!
 
 ## Disclamer
 
-Don't look at the code, it's ugly! You're always welcome to post a pull request to make the code cleaner, or just give me some pointers. I love to learn more!
+Don't look at the code, it's ugly! You're always welcome to post a pull request
+to make the code cleaner, or just give me some pointers. I love to learn more!
