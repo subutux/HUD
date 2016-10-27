@@ -81,13 +81,10 @@ class HAEventHandler(threading.Thread):
 			url="http://{}:{}/api/events/HUD-SSECLIENT-CLOSE?api_password={}"
 		url = url.format(self.settings["host"],self.settings["port"],self.settings["key"])
 		r = requests.post(url);
-		log.debug("result: {}".format(r.text))
 		
 	def stop(self):
 		
 		log.info("Stopping SSEClient")
-		log.debug("Stopping SSEClient->sse.resp.close()")
-		self.sse.resp.close()
 		log.debug("Stopping SSEClient->_stopEvent.set()")
 		self._stopEvent.set()
 		log.info("Waiting for an Event to close ...")
