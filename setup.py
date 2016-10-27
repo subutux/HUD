@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
 from setuptools import setup, find_packages
-
+import re
+ 
+ 
+version = re.search(
+    '^__version__\s*=\s*"(.*)"',
+    open('hud/hud.py').read(),
+    re.M
+    ).group(1)
+ 
+ 
+with open("README.md", "rb") as f:
+    long_descr = f.read().decode("utf-8")
+ 
+ 
 setup(
     name="HUD",
-    version="0.1",
+    version=version,
+    description="Home Assistant UI Display",
+    long_description=long_desc,
     packages=find_packages(),
     install_requires= [
     
