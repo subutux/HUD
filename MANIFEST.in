@@ -1,0 +1,2 @@
+recursive-include hud/pgu.theme/*
+prune hud/pgu.theme/*.xcf

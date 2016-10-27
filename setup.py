@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from setuptools import setup, find_packages
+from setuptools import setup
 import re
  
  
@@ -17,9 +17,17 @@ with open("README.md", "rb") as f:
 setup(
     name="HUD",
     version=version,
+    packages = ["hud"],
     description="Home Assistant UI Display",
     long_description=long_descr,
-    packages=find_packages(),
+    package_data={'hud': [
+        'pgu.theme/style.ini',
+        'pgu.theme/*.png',
+        'pgu.theme/*.ttf',
+        'pgu.theme/mdi/materialdesignicons.css',
+        'pgu.theme/mdi/materialdesignicons-webfont.ttf'
+        ]
+    },
     entry_points = {
         "console_scripts": ['hud = hud.hud:main']
     },
