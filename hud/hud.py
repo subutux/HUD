@@ -12,6 +12,7 @@ from pygame.locals import *
 from pgu import gui
 
 def main():
+	whereami = os.path.dirname(os.path.realpath(__file__))
 	# Parse arguments
 	p = argparse.ArgumentParser(description="A pygame GUI for Home Assistant.")
 	p_config = p.add_argument_group('Configuration')
@@ -101,7 +102,7 @@ def main():
 	
 	
 	log.info("Startup: Load Theme")
-	app = gui.Desktop(theme=gui.Theme("./pgu.theme"))
+	app = gui.Desktop(theme=gui.Theme(whereami+"/pgu.theme"))
 	app.connect(gui.QUIT,app.quit,None)
 	
 	container=gui.Table(width=230,vpadding=0, hpadding=0)
