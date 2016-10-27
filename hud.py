@@ -1,26 +1,11 @@
 #!/usr/bin/env python3
-from eventHandler import HAEventHandler
 import os, sys
 import argparse
 import configparser
 import logging
-p = argparse.ArgumentParser(description="A pygame GUI for Home Assistant.")
-p_config = p.add_argument_group('Configuration')
-p_config.add_argument('-c','--config',help="config file to use",required=True,type=argparse.FileType('r'))
-p_config.add_argument('-f','--framebuffer',help="Use this framebuffer as output for the UI (defaults to window mode)",
-											default=None,type=str,metavar="/dev/fbX")
-p_config.add_argument('-t','--touchscreen',help="Enable touchscreen integration. Use this as event input",
-											default=None,type=str,metavar="/dev/input/eventX")
-p_homeassistant = p.add_argument_group('HomeAssistant'," (optional) Parameters to override the config file")
-p_homeassistant.add_argument('-H','--homeassistant',default=None,help="The location of home-assistant",metavar="host.name")
-p_homeassistant.add_argument('-p','--port',default=None,help="the port to use for home-assistant (default: 8123)",type=int)
-p_homeassistant.add_argument('-k','--key',default=None,help="The api password to use (default: None)",type=str)
-p_homeassistant.add_argument('-s','--ssl',help="Use ssl (default false)",default=False,action="store_true")
-p_logging = p.add_argument_group('Logging'," (optional) Logging settings")
-p_logging.add_argument('-v','--verbose',help="Log output",default=False,action="store_true")
-p_logging.add_argument('-L','--logLevel',dest="logLevel",help="Log level to use (default: ERROR)",choices=["INFO","WARNING","ERROR","CRITICAL","DEBUG"],default="ERROR",type=str)
-p_logging.add_argument('-l','--logfile',help="Instead of logging to stdout, log to this file",default=None)
-args = p.parse_args();
+
+from .eventHandler import HAEventHandler
+from . import elements
 try:
 	import homeassistant.remote as remote
 except:
@@ -37,7 +22,27 @@ try:
 except:
 	print("Unable to import pgu.gui! (See the readme for installing pgu)")
 
-import elements
+# Parse arguments
+p = argparse.ArgumentParser(description="A pygame GUI for Home Assistant.")
+p_config = p.add_argument_group('Configuration')
+p_config.add_argument('-c','--config',help="config file to use",required=True,type=argparse.FileType('r'))
+p_config.add_argument('-f','--framebuffer',help="Use this framebuffer as output for the UI (defaults to window mode)",
+											default=None,type=str,metavar="/dev/fbX")
+p_config.add_argument('-t','--touchscreen',help="Enable touchscreen integration. Use this as event input",
+											default=None,type=str,metavar="/dev/input/eventX")
+p_config.add_argument('-n','--no-display',help="We don't have a display. Sets the SDL_VIDEODRIVER to \"dummy\". Usefull for testing",dest="dummy",action="store_true",
+											default=False)
+p_homeassistant = p.add_argument_group('HomeAssistant'," (optional) Parameters to override the config file")
+p_homeassistant.add_argument('-H','--homeassistant',default=None,help="The location of home-assistant",metavar="host.name")
+p_homeassistant.add_argument('-p','--port',default=None,help="the port to use for home-assistant (default: 8123)",type=int)
+p_homeassistant.add_argument('-k','--key',default=None,help="The api password to use (default: None)",type=str)
+p_homeassistant.add_argument('-s','--ssl',help="Use ssl (default false)",default=False,action="store_true")
+p_logging = p.add_argument_group('Logging'," (optional) Logging settings")
+p_logging.add_argument('-v','--verbose',help="Log output",default=False,action="store_true")
+p_logging.add_argument('-L','--logLevel',dest="logLevel",help="Log level to use (default: ERROR)",choices=["INFO","WARNING","ERROR","CRITICAL","DEBUG"],default="ERROR",type=str)
+p_logging.add_argument('-l','--logfile',help="Instead of logging to stdout, log to this file",default=None)
+args = p.parse_args();
+
 
 # Setup logger
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)s:%(name)s] [%(levelname)-5.5s]  %(message)s")
@@ -91,13 +96,14 @@ if args.touchscreen:
 	log.info("Startup: Setting up touchscreen support")
 	os.putenv('SDL_MOUSEDRV'   , 'TSLIB')
 	os.putenv('SDL_MOUSEDEV' , args.touchscreen)
-	
+if args.dummy:
+	os.putenv('SDL_VIDEODRIVER', 'dummy')
 if args.framebuffer:
 	pygame_opts = FULLSCREEN | HWSURFACE | DOUBLEBUF
 	#                         ^UNTESTED!^
 else:
 	pygame_opts = SWSURFACE
-screen = pygame.display.set_mode((320,480),flags=pygame_opts)
+screen = pygame.display.set_mode((320,480),pygame_opts)
 
 if args.touchscreen:
 	## Hide the mouse cursor if we have a touchscreen
