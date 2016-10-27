@@ -18,8 +18,11 @@ setup(
     name="HUD",
     version=version,
     description="Home Assistant UI Display",
-    long_description=long_desc,
+    long_description=long_descr,
     packages=find_packages(),
+    entry_points = {
+        "console_scripts": ['hud = hud.hud:main']
+    },
     install_requires= [
     
         "homeassistant==0.31.1",
