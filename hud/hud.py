@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+__version__="0.1b"
 import os, sys
 import argparse
 import configparser
