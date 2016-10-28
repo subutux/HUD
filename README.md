@@ -21,7 +21,15 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 
 ## Install
 ```bash
-pip3 install --process-dependency-links .
+# install the pygame dependicies for compilation.
+sudo apt install python3-pip python3-dev libsdl-image1.2-dev libsdl-mixer1.2-dev  libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev
+# Clone the repo
+git clone https://github.com/subutux/HUD
+# Install using pip
+sudo pip3 install --process-dependency-links .
+
+# run the help
+hud --help
 ```
 ### Why `--process-dependency-links`
 
@@ -57,7 +65,47 @@ HomeAssistant section.
 
 
 Enjoy!
+## Arguments
+```
+usage: hud [-h] -c CONFIG [-f /dev/fbX] [-t /dev/input/eventX] [-n]
+           [-H host.name] [-p PORT] [-k KEY] [-s] [-v]
+           [-L {INFO,WARNING,ERROR,CRITICAL,DEBUG}] [-l LOGFILE]
 
+A pygame GUI for Home Assistant.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Configuration:
+  -c CONFIG, --config CONFIG
+                        config file to use
+  -f /dev/fbX, --framebuffer /dev/fbX
+                        Use this framebuffer as output for the UI (defaults to
+                        window mode)
+  -t /dev/input/eventX, --touchscreen /dev/input/eventX
+                        Enable touchscreen integration. Use this as event
+                        input
+  -n, --no-display      We don't have a display. Sets the SDL_VIDEODRIVER to
+                        "dummy". Usefull for testing
+
+HomeAssistant:
+  (optional) Parameters to override the config file
+
+  -H host.name, --homeassistant host.name
+                        The location of home-assistant
+  -p PORT, --port PORT  the port to use for home-assistant (default: 8123)
+  -k KEY, --key KEY     The api password to use (default: None)
+  -s, --ssl             Use ssl (default false)
+
+Logging:
+  (optional) Logging settings
+
+  -v, --verbose         Log output
+  -L {INFO,WARNING,ERROR,CRITICAL,DEBUG}, --logLevel {INFO,WARNING,ERROR,CRITICAL,DEBUG}
+                        Log level to use (default: ERROR)
+  -l LOGFILE, --logfile LOGFILE
+                        Instead of logging to stdout, log to this file
+```
 ## Disclamer
 
 Don't look at the code, it's ugly! You're always welcome to post a pull request
