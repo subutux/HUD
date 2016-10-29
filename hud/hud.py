@@ -173,4 +173,4 @@ def main():
 			pass
 	
 	HAE.stop()
-	return True
+	sys.exit(0)
