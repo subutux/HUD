@@ -1,0 +1,18 @@
+# TODO's
+- [ ] Refactor code
+   - [ ] Get rid of the if/else on domain. This should be done in `elements.py`
+      - [ ] Should be one function call `init_sections`
+   - [ ] Create more classes for specific domains.
+      - [ ] device_tracker
+      - [ ] media_player
+      - [ ] dropdown
+   - [ ] Don't show group header switches when the're useless
+- [ ] Support notifications
+   - [ ] Create a home assistant notification component
+   - [ ] Receive notifications over the event stream
+   - [ ] Different types
+      - [ ] Full screen
+      - [ ] slide down (iOS)
+      - [ ] Slide up
+- [ ] Change icon colors depending on state
+   - [ ] use color of lights like home assistant web ui does   
