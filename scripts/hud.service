@@ -1,0 +1,14 @@
+[Unit]
+Description=Home assistant UI Display
+After=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/default/hud.opts
+User=root
+SendSIGHUP=no
+ExecStart=/usr/local/sbin/hud.init $HUD_OPTS
+KillSignal=SIGINT
+[Install]
+WantedBy=multi-user.target
+Alias=hud.service

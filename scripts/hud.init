@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#####
+#
+# hud.init
+# --------
+#
+# This script does noting more than start hud.
+# This is a work around for a nasty problem with
+# SSEClient/requests. The problem was that the 
+# requests with 'stream=True' would'nt initialize
+# when hud is run directly from systemd.
+#
+# For some weird reason running hud from this bash
+# 'wrapper' fixes the annoyance.
+
+/usr/local/bin/hud $@
+

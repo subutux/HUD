@@ -31,6 +31,11 @@ setup(
     entry_points = {
         "console_scripts": ['hud = hud.hud:main']
     },
+    data_files = [
+        ('/etc/default',['scripts/hud.opts']),
+        ('/etc/systemd/system',['scripts/hud.service']),
+        ('/usr/local/sbin',['scripts/hud.init'])
+    ],
     install_requires= [
     
         "homeassistant==0.31.1",

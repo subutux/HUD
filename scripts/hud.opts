@@ -1,0 +1,7 @@
+#Home assistant UI Display
+
+# Specify here your hud arguments
+
+HUD_OPTS="-v -L INFO -c /etc/hud/config.ini -f /dev/fb1 -t /dev/input/event0"
+#                       ^    Change Me    ^    ^ Me 2 ^    ^ Also me please ^
+
