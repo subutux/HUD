@@ -45,11 +45,14 @@ with open("README.md", "rb") as f:
  
  
 setup(
-    name="HUD",
+    name="hud",
     version=version,
     packages = ["hud"],
     description = "Home Assistant UI Display",
     long_description = long_descr,
+    author = "Stijn Van Campenhout",
+    author_email = "subutux@gmail.com",
+    licence = "MIT",
     package_data = {'hud': [
         'pgu.theme/style.ini',
         'pgu.theme/*.png',
@@ -70,5 +73,8 @@ setup(
     dependency_links = [        
         "https://github.com/parogers/pgu/archive/67558479fe9050ba567a39fc9faa32ce74eba786.tar.gz#egg=pgu-0.18",
         "https://bitbucket.org/pygame/pygame/get/010a750596cf.tar.gz#egg=pygame-1.9.2b8"
-    ]
+    ],
+    url = "https://github.com/subutux/HUD",
+    download_url = "https://github.com/subutux/HUD/tarball/{}".format(version)
+    keywords = ["pygame","rpi","ui","touchscreen","homeassistant"]
 )
