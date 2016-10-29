@@ -138,7 +138,7 @@ def main():
 						HAE.add_listener(entity.entity_id,row.set_hass_event)
 						 #row.draw()
 						c.td(row.draw(),align=-1)
-					elif (entity.domain == "sensor"):
+					elif (entity.domain in ('sensor','device_tracker')):
 						# widget = gui.Label("{} : {}".format(str(entity.name),str(entity.state)))
 						# c.td(widget)
 						row = elements.rowSensor(hass,entity,last=(True if entity == entities[-1] else False))
