@@ -63,8 +63,41 @@ The second one is a group definition. it needs an group entity name
 There can be as many sections as you want, if you have at least one
 HomeAssistant section.
 
+## Auto start
 
-Enjoy!
+When running on a pi, you probably want to auto start hud.
+When installing hud, there are some extra files installed:
+
+- /etc/systemd/system/hud.service
+ 
+  A systemd service for starting up HUD
+- /etc/default/hud.opts
+
+  Your command line parameters for HUD
+- /usr/local/sbin/hud.init
+ 
+  a workaround for a problem with sseclient in systemd
+
+About that last one,This is a work around for a nasty problem with
+SSEClient/requests. The problem was that the requests with
+'stream=True' would'nt initialize when hud is run directly from
+systemd.
+
+For some weird reason running hud from this bash'wrapper' fixes
+the annoyance.
+
+If someone has any idea why this is, let me know. I'm eager to know.
+
+
+### Enabling service
+
+To enable the service, run:
+
+```bash
+sudo systemctl enable hud.service
+sudo systemctl daemon-reload
+```
+
 ## Arguments
 ```
 usage: hud [-h] -c CONFIG [-f /dev/fbX] [-t /dev/input/eventX] [-n]
