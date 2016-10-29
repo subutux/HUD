@@ -202,6 +202,7 @@ class sensorValue(gui.Button):
 		if "unit_of_measurement" in haevent.attributes:
 			self.sValue += " {}".format(haevent.attributes["unit_of_measurement"])
 		self.value = self.sValue
+		self.repaint()
 	def event(self,e):
 		pass
 
@@ -261,7 +262,7 @@ class rowSensor(object):
 		self.btn_cls = "button"
 		self.sw_cls = "sensor"
 		
-		self.light_width = (width-36)
+		self.sensorName_width = (width-36)
 		#                          |   
 		#                          |   
 		#                          +----> Switch size
@@ -273,9 +274,22 @@ class rowSensor(object):
 			self.btn_cls += "_last"
 			self.sw_cls += "_last"
 	def set_hass_event(self,event):
-		self.light.set_hass_event(event)
-		self.state.set_hass_event(event)
+		"""
+		Update the hass event on our widgets
 
+		We need to re-calculate the width of self.sensorName
+		because the sensor value could be larger/smaller then
+		its previous state.
+
+		We then remove the self.state from the widget & re-add it
+		"""
+		self.state.set_hass_event(event)
+		stateWidth = self.state._value.style.width + self.state.style.padding_left + self.state.style.padding_right
+		self.sensorName.style.width = self.sensorName_width-stateWidth
+		self.sensorName.set_hass_event(event)
+		self.widget.remove(self.state)
+		self.widget.add(self.state,self.width-stateWidth,0)
+		
 	def draw(self):
 		if self.icon:
 			self.iconButton = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=36)
@@ -283,9 +297,9 @@ class rowSensor(object):
 			self.iconButton = gui.Button(" ",cls=self.btn_cls,height=20,width=36)
 		self.state = sensorValue(self.api,self.entity,cls=self.sw_cls,height=20)
 		stateWidth = self.state._value.style.width + self.state.style.padding_left + self.state.style.padding_right
-		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=(self.light_width-stateWidth),height=20)
+		self.sensorName = Light(self.api,self.entity,cls=self.btn_cls,width=(self.sensorName_width-stateWidth),height=20)
 		self.widget.add(self.iconButton,0,0)
-		self.widget.add(self.light,36,0)
+		self.widget.add(self.sensorName,36,0)
 		print("Width state = {}".format(str(self.state._value.style.width)))
 		self.widget.add(self.state,self.width-stateWidth,0)
 		return self.widget
