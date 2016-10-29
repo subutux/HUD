@@ -12,10 +12,12 @@ import homeassistant.remote as remote
 import pygame
 from pygame.locals import *
 from pgu import gui
+
 # Quick-Fix (tm) for systemd
 def _sighup(signal,frame):
 	return true
 signal.signal(signal.SIGHUP,_sighup)
+
 def main():
 	whereami = os.path.dirname(os.path.realpath(__file__))
 	# Parse arguments
