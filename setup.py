@@ -75,6 +75,6 @@ setup(
         "https://bitbucket.org/pygame/pygame/get/010a750596cf.tar.gz#egg=pygame-1.9.2b8"
     ],
     url = "https://github.com/subutux/HUD",
-    download_url = "https://github.com/subutux/HUD/tarball/{}".format(version)
+    download_url = "https://github.com/subutux/HUD/tarball/{}".format(version),
     keywords = ["pygame","rpi","ui","touchscreen","homeassistant"]
 )
