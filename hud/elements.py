@@ -1,12 +1,29 @@
 from pgu import gui
 from pygame.locals import *
 from pgu.gui.const import *
+from PIL import Image, ImageOps, ImageDraw
 import homeassistant.remote as remote
 import homeassistant.const  as hasconst
 import icon_font_to_png
 import time
 import os.path
 whereami = os.path.dirname(os.path.realpath(__file__))
+
+####
+def maskImage(image,mask,size=(20,20),outputRoot="/tmp")
+
+	mask = Image.new('L', size, 0)
+	draw = ImageDraw.Draw(mask) 
+	draw.ellipse((0, 0) + size, fill=255)
+	im = Image.open(image)
+	output = ImageOps.fit(im, mask.size, centering=(0.5, 0.5))
+	output.putalpha(mask)
+	outputFile = '{}/{}_masked_with_{}.png'.format(outputRoot,
+																								os.path.splittext(os.path.basename(image))[0]),
+																								os.path.splittext(os.path.basename(mask))[0])
+	output.save(outputFile)
+	return outputFile
+###
 class mdiIcons(object):
 	"""
 	Class for easy converting font icon to a gui.Image
@@ -42,73 +59,120 @@ class mdiIcons(object):
 
 icons = mdiIcons(whereami+"/pgu.theme/mdi/materialdesignicons.css",
 									   whereami+"/pgu.theme/mdi/materialdesignicons-webfont.ttf")
-		
 
-class Light(gui.Button):
-	def __init__(self,api,haevent,**kwargs):
+class eventButton(gui.Button):
+	"""
+	A class to set the state of a button depending on an event
+	"""
+	def __init__(self,api,haevent,value,**kwargs):
 		self.api = api
 		self.haevent = None
-		super().__init__(haevent.name,**kwargs)
+		self.button_name = None
+		super().__init__(value,**kwargs)
 
 		self.set_hass_event(haevent)
 		self.connect(gui.CLICK,self.callback)
-
+		
+  	
 	def callback(self):
 		
-		if self.haevent.state == hasconst.STATE_OFF:
-			status = remote.call_service(self.api,self.haevent.domain,'turn_on',{
-				'entity_id': self.haevent.entity_id
+		if self.event.state == hasconst.STATE_OFF:
+			status = remote.call_service(self.api,self.event.domain,haconst.SERVICE_TURN_ON,{
+				haconst.CONF_ENTITY_ID: self.haevent.entity_id
 				})
 		else:
-			status = remote.call_service(self.api,self.haevent.domain,'turn_off',{
-				'entity_id': self.haevent.entity_id
+			status = remote.call_service(self.api,self.event.domain,haconst.SERVICE_TURN_OFF,{
+				haconst.CONF_ENTITY_ID: self.haevent.entity_id
 				})
-		
-		# TODO: Fix time
-		self.set_hass_event(remote.get_state(self.api,self.haevent.entity_id))
 
-	def set_hass_event(self,haevent):
-		self.haevent = haevent;
+	def set_hass_event(self,event):
+		self.event = event;
 		
-		if self.haevent.state == hasconst.STATE_OFF:
+		if self.event.state == hasconst.STATE_OFF:
 			
 			self.state = 0
 			self.pcls = ""
-		elif self.haevent.state == hasconst.STATE_ON:
+		elif self.event.state == hasconst.STATE_ON:
 			
 			self.state = 1
 			self.pcls = "down"
 		self.repaint()
-	def update_hass_event():
-		self.set_hass_event(remote.get_state(self.api,self.haevent.entity_id))		
 	def event(self,e):
 
 		if e.type == ENTER: self.repaint()
 		elif e.type == EXIT: self.repaint()
 		elif e.type == FOCUS: self.repaint()
 		elif e.type == BLUR: self.repaint()
-		elif e.type == KEYDOWN:
-		    if e.key == K_SPACE or e.key == K_RETURN:
-		        self.state = 1
-		        self.repaint()
 		elif e.type == MOUSEBUTTONDOWN:
 		    self.state = 1
 		    self.repaint()
-		elif e.type == KEYUP:
-		    if self.state == 1:
-		        sub = pygame.event.Event(CLICK,{'pos':(0,0),'button':1})
-		        #self.send(sub.type,sub)
-		        self._event(sub)
-		        #self.event(sub)
-		        #self.click()
-
-		    #self.state = 0
-		    self.repaint()
 		elif e.type == MOUSEBUTTONUP:
-		    #self.state = 0
 		    self.repaint()
 		elif e.type == CLICK:
 		    self.click()
+
+
+class IconButton(eventButton):
+	"""
+	A button containing the icon of the event.
+	"""
+	def __init__(self,api,haevent**kwargs):
+		if "icon" in haevent.attributes:
+			self.icon = haevent.attributes["icon"]
+		else:
+			self.icon = 'mdi-eye'
+		value = icons.icon(self.icon,20,color="rgb(68, 115, 158)")
+		super().__init__(api,haevent,icon,**kwargs)
+
+
+class sensorValue(eventButton):
+	"""
+	A button containing the Sensor Value (state) of an event
+	"""
+	
+	def __init__(self,api,haevent**kwargs):
+		super().__init__(api,haevent,icon,**kwargs)
+		
+  def create_value(self,haevent):
+		sValue = self.haevent.state
+		if "unit_of_measurement" in self.haevent.attributes:
+			sValue += " {}".format(self.haevent.attributes["unit_of_measurement"])
+		return sValue
+		
+	def set_hass_event(self,haevent):
+		self.haevent = haevent
+		self.value = self.create_value()
+		self.repaint()
+		
+  def event(self,e):
+  	return True
+
+
+
+class Row(object):
+	"""
+	The main class for all rows. To create a new row, inherit from this one
+	"""
+	def __init__(self,api,event,last=False,width=320,height=20):
+		self.api = api
+		self.width = width
+		self.height = height
+		self.icon = "mdi:eye"
+		self.widget = gui.Container(height=self.height,width=self.width,align=-1,valign=-1,background=(220,220,220))
+		self.setup()
+  
+  def setup(self):
+		"""
+		Needs to be overridden
+		"""
+  	self.btnicon = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=self.height,width=36)
+		self.name = eventButton(self.api,self.event,height=self.height)
+		self.value = eventButton(self.api,self.event,height=self.height)
+	
+  	self.set_hass_event(haevent)
+		self.connect(gui.CLICK,self.callback)
+
+
 		
 #		if self.haevent.state == hasconst.STATE_ON: img = self.style.down
 #		s.blit(img,(0,0))		
@@ -135,7 +199,7 @@ class LightSwitch(gui.Switch):
 				})
 		
 		# TODO: Fix time
-		self.update_hass_event()
+		#self.update_hass_event()
 	def click(self):
 		pass
 	def set_hass_event(self,haevent):
@@ -159,51 +223,13 @@ class Header(gui.Button):
 		super().__init__(name,**kwargs)
 
 	def event(self,e):
-
-		if e.type == ENTER: self.repaint()
-		elif e.type == EXIT: self.repaint()
-		elif e.type == FOCUS: self.repaint()
-		elif e.type == BLUR: self.repaint()
-		elif e.type == KEYDOWN:
-		    if e.key == K_SPACE or e.key == K_RETURN:
-		        self.state = 1
-		        self.repaint()
-		elif e.type == MOUSEBUTTONDOWN:
-		    self.state = 1
-		    self.repaint()
-		elif e.type == KEYUP:
-		    if self.state == 1:
-		        sub = pygame.event.Event(CLICK,{'pos':(0,0),'button':1})
-		        #self.send(sub.type,sub)
-		        self._event(sub)
-		        #self.event(sub)
-		        #self.click()
-
-		    #self.state = 0
-		    self.repaint()
-		elif e.type == MOUSEBUTTONUP:
-		    #self.state = 0
-		    self.repaint()
-		elif e.type == CLICK:
-		    self.click()
-
-class sensorValue(gui.Button):
-	def __init__(self,api,haevent,**kwargs):
-		self.api = api
-		self.haevent = None
-		super().__init__("",**kwargs)
-		self.set_hass_event(haevent)
-
-
-	def set_hass_event(self,haevent):
+		"""
+		Currently, we don't care for events on the header
+		"""
 		
-		self.haevent = haevent
-		self.sValue = haevent.state
-		if "unit_of_measurement" in haevent.attributes:
-			self.sValue += " {}".format(haevent.attributes["unit_of_measurement"])
-		self.value = self.sValue
-	def event(self,e):
-		pass
+		return True
+
+
 
 class eventLabel(gui.Label):
 	def __init__(self,entity):
@@ -296,4 +322,5 @@ class rowHeader(rowLight):
 		super().__init__(api,entity,last=False,width=width,table=table)
 		self.icon = None
 		self.btn_cls = "button_header"
+
 
