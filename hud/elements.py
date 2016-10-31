@@ -9,6 +9,10 @@ import time
 import os.path
 whereami = os.path.dirname(os.path.realpath(__file__))
 
+
+icons = mdiIcons(whereami+"/pgu.theme/mdi/materialdesignicons.css",
+									   whereami+"/pgu.theme/mdi/materialdesignicons-webfont.ttf")
+
 ####
 def maskImage(image,mask,size=(20,20),outputRoot="/tmp")
 
@@ -57,8 +61,6 @@ class mdiIcons(object):
 		return gui.Image("{}/{}".format("/tmp",file))
 
 
-icons = mdiIcons(whereami+"/pgu.theme/mdi/materialdesignicons.css",
-									   whereami+"/pgu.theme/mdi/materialdesignicons-webfont.ttf")
 
 class eventButton(gui.Button):
 	"""
@@ -125,6 +127,41 @@ class IconButton(eventButton):
 		super().__init__(api,haevent,icon,**kwargs)
 
 
+class LightSwitch(gui.Switch):
+	"""
+	A switch representing the state of an event
+	"""
+	
+	def __init__(self,api,haevent,**kwargs):
+		self.api = api
+		self.haevent = None
+		
+		super().__init__(value=False,**kwargs)
+		
+		self.connect(gui.CLICK,self.callback)
+		self.set_hass_event(haevent)
+	def callback(self):
+		
+		
+		if self.event.state == hasconst.STATE_OFF:
+			status = remote.call_service(self.api,self.event.domain,haconst.SERVICE_TURN_ON,{
+				haconst.CONF_ENTITY_ID: self.haevent.entity_id
+				})
+		else:
+			status = remote.call_service(self.api,self.event.domain,haconst.SERVICE_TURN_OFF,{
+				haconst.CONF_ENTITY_ID: self.haevent.entity_id
+				})
+
+	def click(self):
+		pass
+	def set_hass_event(self,haevent):
+		self.haevent = haevent;
+		if self.haevent.state == hasconst.STATE_OFF:
+			self._value = False
+		elif self.haevent.state == hasconst.STATE_ON:
+			self._value = True
+		self.repaint()
+	
 class sensorValue(eventButton):
 	"""
 	A button containing the Sensor Value (state) of an event
@@ -132,6 +169,7 @@ class sensorValue(eventButton):
 	
 	def __init__(self,api,haevent**kwargs):
 		super().__init__(api,haevent,icon,**kwargs)
+		self.cls = "sensor"
 		
   def create_value(self,haevent):
 		sValue = self.haevent.state
@@ -153,67 +191,115 @@ class Row(object):
 	"""
 	The main class for all rows. To create a new row, inherit from this one
 	"""
-	def __init__(self,api,event,last=False,width=320,height=20):
+	def __init__(self,api,haevent,last=False,width=320,height=20):
 		self.api = api
 		self.width = width
 		self.height = height
 		self.icon = "mdi:eye"
+		self._haevent = None
+		self._btnicon = None
+		self._name = None
+		self._value = None
+	  self.lastRow = False
 		self.widget = gui.Container(height=self.height,width=self.width,align=-1,valign=-1,background=(220,220,220))
+		self.haevent = haevent
+
 		self.setup()
-  
+		
   def setup(self):
 		"""
 		Needs to be overridden
-		"""
-  	self.btnicon = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=self.height,width=36)
+		
+		with something like this:
+		
+		self.btnicon = iconButton(self.api,self.event,height=self.height)
 		self.name = eventButton(self.api,self.event,height=self.height)
 		self.value = eventButton(self.api,self.event,height=self.height)
+	  """
+	  pass
+	 
+  @property
+	def haevent(self):
+		return self._haevent
+
+	@haevent.setter
+	def haevent(self,haevent):
+		## This needs to be SSEClient.Event
+		## But don't know the inpact
+		if isinstance(haevent,object):
+			self._haevent = haevent
 	
-  	self.set_hass_event(haevent)
-		self.connect(gui.CLICK,self.callback)
+	@property
+	def btnicon(self):
+		return self._btnicon
+	
+	@btnicon.setter
+	def btnicon(self,icon):
+		if isinstance(icon,eventButton):
+			self._btnicon = icon
+			if self.lastRow:
+				self._btnicon.cls += "_last"
+	
+  @property
+	def name(self):
+		return self._name
 
+	@name.setter
+	def name(self,name):
+		if isinstance(name,eventButton):
+			self._name = name	
+			if self.lastRow:
+				self._name.cls += "_last"
 
-		
-#		if self.haevent.state == hasconst.STATE_ON: img = self.style.down
-#		s.blit(img,(0,0))		
+  @property
+	def value(self):
+		return self._value
 
-class LightSwitch(gui.Switch):
-	def __init__(self,api,haevent,**kwargs):
-		self.api = api
-		self.haevent = None
+	@value.setter
+	def value(self,value):
+		if isinstance(value,eventButton):
+			self._value = value
+			if self.lastRow:
+				self._value.cls += "_last"
+  
+	def draw(self,update=False):
+		#start with full width
+		nameWidth = self.width
+		btniconWidth = 0
+		#check if we have an icon
+		if self._btnicon:
+		  btniconWidth = self._btn.style.width
+			nameWidth -= self._btn.style.width
+			self.widget.add(self._btnicon,0,0)
+		self.widget.add(self._value,self.width-self._value.style.width,0)
+	  nameWith -= self._value.style.width
+	  self._name.style.width = nameWith
+	  
+		self.widget.add(self._name,btniconWidth,0)
 		
-		super().__init__(value=False,**kwargs)
+		return self.widget
+	
+	def repaint(self):
 		
-		self.connect(gui.CLICK,self.callback)
-		self.set_hass_event(haevent)
-	def callback(self):
+		self.widget.remove(self._value)
+		self.widget.add(self._value,self.width-self._value.style.width,0)
+			self._name.style.width = self.width - self._value.style.width
+		if self._btnicon:
+		  self._name.style.width -= - self._btnicon.style.width
+	
+	def set_hass_event(self,event):
+		"""
+		This is the main callback or receiving new events
 		
-		if self.haevent.state == hasconst.STATE_OFF:
-
-			status = remote.call_service(self.api,"homeassistant",'turn_on',{
-				'entity_id': self.haevent.entity_id
-				})
-		else:
-			status = remote.call_service(self.api,"homeassistant",'turn_off',{
-				'entity_id': self.haevent.entity_id
-				})
-		
-		# TODO: Fix time
-		#self.update_hass_event()
-	def click(self):
-		pass
-	def set_hass_event(self,haevent):
-		self.haevent = haevent;
-		if self.haevent.state == hasconst.STATE_OFF:
-			self._value = False
-		elif self.haevent.state == hasconst.STATE_ON:
-			self._value = True
+		Sets the haevents + toggle a repaint.
+		"""
+		self.haevent = event
+		self._btnicon.set_hass_event(event)
+		self._name.set_hass_event(event)
+		self._value.set_hass_event(event)	
 		self.repaint()
-	def update_hass_event(self):
-		self.set_hass_event(remote.get_state(self.api,self.haevent.entity_id))		
 		
-#		if self.haevent.state == hasconst.STATE_ON: img = self.style.down
-#		s.blit(img,(0,0))		
+
 
 class Header(gui.Button):
 	def __init__(self,name,**kwargs):
@@ -229,92 +315,28 @@ class Header(gui.Button):
 		
 		return True
 
-
-
-class eventLabel(gui.Label):
-	def __init__(self,entity):
-		self.haevent = entity
-		super().__init__("")
-		self.set_hass_event(entity)
-	def set_hass_event(self,haevent):
-		self.haevent = haevent
-		self.value = haevent.state
-		self.repaint()
+		
+class rowLight(Row)
+	def __init__(self,api,haevent,last=False,width=320,height=20):
+		super().__init__(self,api,haevent,last=False,width=320,height=20)
 	
-class rowLight(object):
-	def __init__(self,api,entity,last=False,width=320,table=None):
-		self.api = api
-		self.width = width
-		#self.widget = gui.Table(width=width) if table == None else table
-		self.widget = gui.Container(height=20,width=320,align=-1,valign=-1,background=(220, 220, 220))
-		self.entity = entity
-		self.btn_cls = "button"
-		self.sw_cls = "switch"
-		self.ligth_width = (width-36)-36
-		self.icon = 'mdi-lightbulb'
-		
-		if last:
-			self.btn_cls += "_last"
-			self.sw_cls += "_last"
-	def set_hass_event(self,event):
-		self.light.set_hass_event(event)
-		if self.entity.state != "unknown":
-			self.switch.set_hass_event(event)
+	def setup(self):
+		self.value = LightSwitch(self.api,self.haevent,height=20)
+		self.name = eventButton(self.api,self.haevent,height=20)
+		self.btnicon = IconButton(self.api,self.haevent,height=20)
 
-	def draw(self):
-		if self.icon:
-			self.iconButton = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=36)
-		else:
-			self.iconButton = gui.Button(" ",cls=self.btn_cls,height=20,width=36)
-		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=238,height=20)
-		if self.entity.state != "unknown":
-			self.switch = LightSwitch(self.api,self.entity,cls=self.sw_cls)
-		else:
-			self.switch= gui.Button("",cls=self.btn_cls,width=20,height=20)
 
-		self.widget.add(self.iconButton,0,0)
-		self.widget.add(self.light,36,0)
-		self.widget.add(self.switch,self.width-36,0)
-		return self.widget
+class rowSensor(Row)
+	def __init__(self,api,haevent,last=False,width=320,height=20):
+		super().__init__(self,api,haevent,last=False,width=320,height=20)
+	
+	def setup(self):
+		self.value = sensorValue(self.api,self.haevent,height=20)
+		self.name = eventButton(self.api,self.haevent,height=20)
+		self.btnicon = IconButton(self.api,self.haevent,height=20)
 
-class rowSensor(object):
-	def __init__(self,api,entity,last=False,width=320):
-		self.api = api
-		self.width = width
-		#self.widget = gui.Table(width=width)
-		self.widget = gui.Container(height=20,width=self.width,align=-1,valign=-1,background=(220,220,220))
-		self.entity = entity
-		self.btn_cls = "button"
-		self.sw_cls = "sensor"
-		
-		self.light_width = (width-36)
-		#                          |   
-		#                          |   
-		#                          +----> Switch size
-		if "icon" in entity.attributes:
-			self.icon = entity.attributes["icon"]
-		else:
-			self.icon = 'mdi-eye'
-		if last:
-			self.btn_cls += "_last"
-			self.sw_cls += "_last"
-	def set_hass_event(self,event):
-		self.light.set_hass_event(event)
-		self.state.set_hass_event(event)
 
-	def draw(self):
-		if self.icon:
-			self.iconButton = gui.Button(icons.icon(self.icon,20,color="rgb(68, 115, 158)"),cls=self.btn_cls,height=20,width=36)
-		else:
-			self.iconButton = gui.Button(" ",cls=self.btn_cls,height=20,width=36)
-		self.state = sensorValue(self.api,self.entity,cls=self.sw_cls,height=20)
-		stateWidth = self.state._value.style.width + self.state.style.padding_left + self.state.style.padding_right
-		self.light = Light(self.api,self.entity,cls=self.btn_cls,width=(self.light_width-stateWidth),height=20)
-		self.widget.add(self.iconButton,0,0)
-		self.widget.add(self.light,36,0)
-		print("Width state = {}".format(str(self.state._value.style.width)))
-		self.widget.add(self.state,self.width-stateWidth,0)
-		return self.widget
+
 
 class rowHeader(rowLight):
 	def __init__(self,api,entity,width=320,table=None):
