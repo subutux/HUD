@@ -18,7 +18,7 @@ install_requires = [
     "Pillow==3.4.2",
     "pytz==2016.7",
     "PyYAML==3.12",
-    "requests==2.11.1",
+    "requests>=2.20.0",
     "six==1.10.0",
     "sseclient==0.0.12",
     "tinycss==0.4",

@@ -6,9 +6,9 @@ name = "pypi"
 [packages]
 homeassistant = ">0.77"
 "pgu-0.18" = {editable = true, ref = "67558479fe9050ba567a39fc9faa32ce74eba786", git = "git://github.com/parogers/pgu/"}
-"pygame" = "==1.9.4" 
+"pygame" = "==1.9.4"
 pytz = "==2016.7"
-requests = "*"
+requests = ">=2.20.0"
 six = "==1.10.0"
 sseclient = "==0.0.12"
 tinycss = "==0.4"
