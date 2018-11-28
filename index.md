@@ -1,5 +1,5 @@
 # Homeassistant UI Display
-This is a UI for [home-assistant](http://home-assistant.io) i've 
+This is a UI for [home-assistant](http://home-assistant.io) i've
 written for own use. It's main purpose is to be able to control
 home-assistant from a pi with a touchscreen mounted on the wall.
 
@@ -8,7 +8,8 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 & UI elements, I've tried to mimmick the web ui of home-assistant.
 
 ## Screenshot
-![images/screencast.png](https://github.com/subutux/HUD/raw/master/images/screencast.gif) ![images/touchscreen.gif](https://github.com/subutux/HUD/raw/master/images/touchscreen.gif)
+![images/screencast.png](images/screencast.gif)
+![images/touchscreen.gif](images/touchscreen.gif)
 
 ## features
 * displaying group items
@@ -18,43 +19,15 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 * Using `icon_font_to_png` to use the Material Design Icon font on the fly.
 * Cool
 
-## Install instructions
-### Home Assistant
-
-Yes, you'll need to install Home Assistant. Don't worry you don't have to run it! We need it for its remote & core class.
-Just do:
-
+## Install
 ```bash
-pip3 install homeassistant
+git clone https://github.com/subutux/HUD
+# Install using pip
+sudo pip3 install .
+
+# run the help
+hud --help
 ```
-
-### pygame on python3
-
-Currently, to my knownledge, there are no known packages pygame on python3
-
-You'll have to compile pygame(1.9.2) from source. Luckly, this isn't that hard.
-
-```bash
-# install these packages for ubuntu/debian
-sudo apt install python3-pip python3-dev libsdl-image1.2-dev libsdl-mixer1.2-dev  libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev python-numpy subversion  libportmidi-dev
-# clone using mercury
-hg clone https://bitbucket.org/pygame/pygame
-cd pygame
-pip3 install .
-```
-
-### pgu on python3
-
-See above, install from source
-```bash
-# get the source from github
-git clone https://github.com/parogers/pgu
-cd pgu
-pip3 install .
-```
-
-### HUD
-place it somewhere. Execute hud.py & enjoy!
 
 ## Configuration
 
@@ -62,10 +35,10 @@ HUD needs a configuration file, ini-style. For Example:
 
 ```ini
 [HomeAssistant]
-Host = localhost
-Port = 8123
+Host = your.external.homeassistant.host
+Port = 443
 Key = my-secret-password
-SSL = False
+SSL = True
 [lights]
 group=lichten_living
 ```
@@ -77,9 +50,83 @@ The second one is a group definition. it needs an group entity name
 There can be as many sections as you want, if you have at least one
 HomeAssistant section.
 
+## Auto start
 
-Enjoy!
+When running on a pi, you probably want to auto start hud.
+When installing hud, there are some extra files installed:
 
+- /etc/systemd/system/hud.service
+
+  A systemd service for starting up HUD
+- /etc/default/hud.opts
+
+  Your command line parameters for HUD
+- /usr/local/sbin/hud.init
+
+  a workaround for a problem with sseclient in systemd
+
+About that last one,This is a work around for a nasty problem with
+SSEClient/requests. The problem was that the requests with
+'stream=True' would'nt initialize when hud is run directly from
+systemd.
+
+For some weird reason running hud from this bash'wrapper' fixes
+the annoyance.
+
+If someone has any idea why this is, let me know. I'm eager to know.
+
+
+### Enabling service
+
+To enable the service, run:
+
+```bash
+sudo systemctl enable hud.service
+sudo systemctl daemon-reload
+```
+
+## Arguments
+```
+usage: hud [-h] -c CONFIG [-f /dev/fbX] [-t /dev/input/eventX] [-n]
+           [-H host.name] [-p PORT] [-k KEY] [-s] [-v]
+           [-L {INFO,WARNING,ERROR,CRITICAL,DEBUG}] [-l LOGFILE]
+
+A pygame GUI for Home Assistant.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Configuration:
+  -c CONFIG, --config CONFIG
+                        config file to use
+  -f /dev/fbX, --framebuffer /dev/fbX
+                        Use this framebuffer as output for the UI (defaults to
+                        window mode)
+  -t /dev/input/eventX, --touchscreen /dev/input/eventX
+                        Enable touchscreen integration. Use this as event
+                        input
+  -n, --no-display      We don't have a display. Sets the SDL_VIDEODRIVER to
+                        "dummy". Usefull for testing
+
+HomeAssistant:
+  (optional) Parameters to override the config file
+
+  -H host.name, --homeassistant host.name
+                        The location of home-assistant
+  -p PORT, --port PORT  the port to use for home-assistant (default: 8123)
+  -k KEY, --key KEY     The api password to use (default: None)
+  -s, --ssl             Use ssl (default false)
+
+Logging:
+  (optional) Logging settings
+
+  -v, --verbose         Log output
+  -L {INFO,WARNING,ERROR,CRITICAL,DEBUG}, --logLevel {INFO,WARNING,ERROR,CRITICAL,DEBUG}
+                        Log level to use (default: ERROR)
+  -l LOGFILE, --logfile LOGFILE
+                        Instead of logging to stdout, log to this file
+```
 ## Disclamer
 
-Don't look at the code, it's ugly! You're always welcome to post a pull request to make the code cleaner, or just give me some pointers. I love to learn more!
+Don't look at the code, it's ugly! You're always welcome to post a pull request
+to make the code cleaner, or just give me some pointers. I love to learn more!
