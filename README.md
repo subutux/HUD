@@ -1,5 +1,5 @@
 # Homeassistant UI Display
-This is a UI for [home-assistant](http://home-assistant.io) i've 
+This is a UI for [home-assistant](http://home-assistant.io) i've
 written for own use. It's main purpose is to be able to control
 home-assistant from a pi with a touchscreen mounted on the wall.
 
@@ -21,26 +21,13 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 
 ## Install
 ```bash
-# install the pygame dependencies for compilation.
-sudo apt install python3-pip python3-dev libsdl-image1.2-dev libsdl-mixer1.2-dev  libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev
-# Clone the repo
 git clone https://github.com/subutux/HUD
 # Install using pip
-sudo pip3 install --process-dependency-links .
+sudo pip3 install .
 
 # run the help
 hud --help
 ```
-### Why `--process-dependency-links`
-
-To my knowledge, there are no packages for `pygame` and `pgu` in PyPi for
-python3.
-
-This option uses the `dependency_links` in `setup.py` for getting the tar.gz
-files from their repos. It's nasty, I know. Can't help it!
-
-
-Side note: The raspberry pi repos contain a pygame package for python3!
 
 ## Configuration
 
@@ -69,13 +56,13 @@ When running on a pi, you probably want to auto start hud.
 When installing hud, there are some extra files installed:
 
 - /etc/systemd/system/hud.service
- 
+
   A systemd service for starting up HUD
 - /etc/default/hud.opts
 
   Your command line parameters for HUD
 - /usr/local/sbin/hud.init
- 
+
   a workaround for a problem with sseclient in systemd
 
 About that last one,This is a work around for a nasty problem with
