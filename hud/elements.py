@@ -72,9 +72,6 @@ class Light(gui.Button):
                     'entity_id': self.haevent.entity_id
                 })
 
-        # TODO: Fix time
-        self.set_hass_event(remote.get_state(self.api, self.haevent.entity_id))
-
     def set_hass_event(self, haevent):
         self.haevent = haevent
 
@@ -151,9 +148,6 @@ class LightSwitch(gui.Switch):
                 self.api, "homeassistant", 'turn_off', {
                     'entity_id': self.haevent.entity_id
                 })
-
-        # TODO: Fix time
-        self.update_hass_event()
 
     def click(self):
         pass
