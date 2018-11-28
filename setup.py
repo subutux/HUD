@@ -11,7 +11,7 @@ who has the pygame package installed by default.
 
 install_requires= [
 
-    "homeassistant==0.31.1",
+    "homeassistant>0.77",
     "icon-font-to-png==0.3.6",
     "Jinja2==2.8",
     "MarkupSafe==0.23",
