@@ -9,7 +9,7 @@ is a simple (but effective) fix for Raspbian
 who has the pygame package installed by default.
 """
 
-install_requires= [
+install_requires = [
 
     "homeassistant>0.77",
     "icon-font-to-png==0.3.6",
@@ -37,44 +37,44 @@ version = re.search(
     '^__version__\s*=\s*"(.*)"',
     open('hud/hud.py').read(),
     re.M
-    ).group(1)
- 
- 
+).group(1)
+
+
 with open("README.md", "rb") as f:
     long_descr = f.read().decode("utf-8")
- 
- 
+
+
 setup(
     name="hud",
     version=version,
-    packages = ["hud"],
-    description = "Home Assistant UI Display",
-    long_description = long_descr,
-    author = "Stijn Van Campenhout",
-    author_email = "subutux@gmail.com",
-    licence = "MIT",
-    package_data = {'hud': [
+    packages=["hud"],
+    description="Home Assistant UI Display",
+    long_description=long_descr,
+    author="Stijn Van Campenhout",
+    author_email="subutux@gmail.com",
+    licence="MIT",
+    package_data={'hud': [
         'pgu.theme/style.ini',
         'pgu.theme/*.png',
         'pgu.theme/*.ttf',
         'pgu.theme/mdi/materialdesignicons.css',
         'pgu.theme/mdi/materialdesignicons-webfont.ttf'
-        ]
+    ]
     },
-    entry_points = {
+    entry_points={
         "console_scripts": ['hud = hud.hud:main']
     },
-    data_files = [
-        ('/etc/default',['scripts/hud.opts']),
-        ('/etc/systemd/system',['scripts/hud.service']),
-        ('/usr/local/sbin',['scripts/hud.init'])
+    data_files=[
+        ('/etc/default', ['scripts/hud.opts']),
+        ('/etc/systemd/system', ['scripts/hud.service']),
+        ('/usr/local/sbin', ['scripts/hud.init'])
     ],
-    install_requires = install_requires,
-    dependency_links = [        
-        "https://github.com/parogers/pgu/archive/67558479fe9050ba567a39fc9faa32ce74eba786.tar.gz#egg=pgu-0.18",
-        "https://bitbucket.org/pygame/pygame/get/010a750596cf.tar.gz#egg=pygame-1.9.2b8"
+    install_requires=install_requires,
+    dependency_links=[
+        "https://github.com/parogers/pgu/archive/67558479fe9050ba567a39fc9faa32ce74eba786.tar.gz#egg=pgu-0.18",  # nopep8
+        "https://bitbucket.org/pygame/pygame/get/010a750596cf.tar.gz#egg=pygame-1.9.2b8"  # nopep8
     ],
-    url = "https://github.com/subutux/HUD",
-    download_url = "https://github.com/subutux/HUD/tarball/{}".format(version),
-    keywords = ["pygame","rpi","ui","touchscreen","homeassistant"]
+    url="https://github.com/subutux/HUD",
+    download_url="https://github.com/subutux/HUD/tarball/{}".format(version),
+    keywords=["pygame", "rpi", "ui", "touchscreen", "homeassistant"]
 )
