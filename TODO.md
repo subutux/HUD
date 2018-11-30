@@ -8,9 +8,11 @@
      - [ ] Add support for tabs
      - [X] Make the window scrollable
      - [ ] Create more classes for specific domains.
-      - [ ] device_tracker
-      - [ ] media_player
-      - [ ] dropdown
+       - [ ] device_tracker
+       - [ ] media_player
+       - [ ] dropdown
+     - [ ] Change icon colors depending on state
+       - [ ] use color of lights like home assistant web ui does
 - [ ] Allow some/all command line parameters to be set in the configfile
 - [ ] Support notifications
    - [ ] Create a home assistant notification component
@@ -19,5 +21,3 @@
       - [ ] Full screen
       - [ ] slide down (iOS)
       - [ ] Slide up
-- [ ] Change icon colors depending on state
-   - [ ] use color of lights like home assistant web ui does
