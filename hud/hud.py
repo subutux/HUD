@@ -162,17 +162,22 @@ def main():
     app = gui.Desktop(theme=gui.Theme(whereami + "/pgu.theme"))
     app.connect(gui.QUIT, app.quit, None)
 
-
     container = gui.Table(width=width, vpadding=0, hpadding=0, cls="desktop")
+    _states = remote.get_states(hass)
+    states = {}
+    for st in _states:
+        states[st.entity_id] = st
     for section in config.sections():
         if section != "HomeAssistant":
             log.info("Startup: Loading section {}".format(str(section)))
             c = container
             c.tr()
-            state = remote.get_state(
+            try:
+                state = states["group.{}"
+                               .format(str(config[section]["group"]))]
+            except KeyError:
+                state = None
             header = elements.rowHeader(hass, state, table=c, width=width)
-                hass, "group.{}".format(str(config[section]["group"])))
-            header = elements.rowHeader(hass, state, table=c)
             HAE.add_listener(state.entity_id, header.set_hass_event)
             c.td(header.draw(), align=-1)
             c.tr()
@@ -185,34 +190,41 @@ def main():
                 log.info("Startup: Fetching entity statusses")
                 # get all states from entities & add to the list
                 # if entity is not None (eg. not found)
-                entities = [e for e in [remote.get_state(
-                    hass, eid) for eid in state.attributes['entity_id']]
-                    if e is not None]
+                entities = state.attributes['entity_id']
                 for entity in entities:
                     log.info("Startup: Loading entity {}".format(
-                        entity.entity_id))
+                        entity))
+                    try:
+                        state_entity = states[entity]
+                    except KeyError:
+                        log.info("Cannot find any state for {0}, skipping"
+                                 .format(entity))
+                        continue
                     # Changeable, lights are hmmMMmmm
-                    if (entity.domain == "light"):
-                        row = elements.rowLight(hass, entity, last=(
+                    if state_entity.domain == "light":
+                        row = elements.rowLight(hass, state_entity, last=(
                             True if entity == entities[-1] else False),
                             width=width,
                             table=c)
                         log.info("Startup: Adding Event listener for {}"
-                                 .format(entity.entity_id))
-                        HAE.add_listener(entity.entity_id, row.set_hass_event)
+                                 .format(entity))
+                        HAE.add_listener(entity, row.set_hass_event)
                         # row.draw()
                         c.td(row.draw(), align=-1)
-                    elif (entity.domain in ('sensor', 'device_tracker')):
+                    elif state_entity.domain in ('sensor', 'device_tracker'):
+                        row = elements.rowSensor(hass, state_entity, last=(
+                            True if entity == entities[-1] else False),
                             width=width)
-                        row = elements.rowSensor(hass, entity, last=(
-                            True if entity == entities[-1] else False))
                         log.info("Startup: Adding Event listener for {}"
-                                 .format(entity.entity_id))
-                        HAE.add_listener(entity.entity_id, row.set_hass_event)
+                                 .format(entity))
+                        HAE.add_listener(entity, row.set_hass_event)
                         c.td(row.draw(), align=-1)
+                    else:
+                        log.info("FIXME:entity {0} has an unknown domain {1}"
+                                 .format(entity, state_entity.domain))
                     c.tr()
 
-            container.td(gui.Spacer(height=4, width=320))
+            container.td(gui.Spacer(height=4, width=width))
     log.info("Startup: Load elements onto surface")
     main = gui.Container(width=width, height=height)
     header = elements.Header("Home Assistant", width=width, height=40)
