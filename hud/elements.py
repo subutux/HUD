@@ -1,10 +1,15 @@
 from pgu import gui
 from pygame.locals import *
+import pygame.event
 from pgu.gui.const import *
 import homeassistant.remote as remote
 import homeassistant.const as hasconst
 import icon_font_to_png
 import os.path
+import moosegesture
+import logging
+log = logging.getLogger('HUD.Elements')
+log.addHandler(logging.NullHandler())
 whereami = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -47,6 +52,57 @@ class mdiIcons(object):
 
 icons = mdiIcons(whereami + "/pgu.theme/mdi/materialdesignicons.css",
                  whereami + "/pgu.theme/mdi/materialdesignicons-webfont.ttf")
+
+
+class Scrollable(gui.SlideBox):
+    def __init__(self, widget, width, height,
+                 scroll_horizontal=False, **params):
+        super().__init__(widget, width, height)
+        self.connect(gui.MOUSEMOTION, self.motion)
+        self.connect(gui.MOUSEBUTTONUP, self.setMotion, False)
+        self.connect(gui.MOUSEBUTTONDOWN, self.setMotion, True)
+        self.inMotion = False
+        self.prevLocs = []
+        self.hscroll = 0
+        self.vscroll = 0
+        self.scroll_horizontal = scroll_horizontal
+
+    def setMotion(self, motion):
+        self.inMotion = motion
+        if not motion:
+            self.prevLocs = []
+            if self.hscroll < 0:
+                self.hscroll = 0
+                self.offset = (self.hscroll, self.vscroll)
+                self.repaint()
+            if self.vscroll < 0:
+                self.vscroll = 0
+                self.offset = (self.hscroll, self.vscroll)
+                self.repaint()
+
+    def addPrevLoc(self, loc):
+        self.prevLocs.append(loc)
+
+    def motion(self, _event):
+        if self.inMotion:
+            self.addPrevLoc(_event.pos)
+            log.debug("Positions: {pos}".format(pos=self.prevLocs))
+            direction = moosegesture.getGesture(self.prevLocs)
+            log.debug("Direction {D}".format(D=direction))
+            if len(direction) == 0:
+                return
+            if direction[-1].startswith("D"):
+                self.vscroll = self.vscroll - 5
+            elif direction[-1].startswith("U"):
+                self.vscroll = self.vscroll + 5
+            elif direction[-1] == "L" and self.scroll_horizontal:
+                self.hscroll = self.hscroll + 5
+            elif direction[-1] == "R" and self.scroll_horizontal:
+                self.hscroll = self.hscroll - 5
+            self.offset = (self.hscroll, self.vscroll)
+            self.repaint()
+            log.debug("Scroll: {x}, {y}"
+                      .format(x=self.hscroll, y=self.vscroll))
 
 
 class Light(gui.Button):
