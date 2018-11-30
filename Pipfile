@@ -19,6 +19,7 @@ icon_font_to_png = "==0.3.6"
 MarkupSafe = "==0.23"
 Pillow = "==3.4.2"
 PyYAML = "==3.12"
+moosegesture = "*"
 
 [dev-packages]
 
