@@ -230,7 +230,7 @@ def main():
     header = elements.Header("Home Assistant", width=width, height=40)
     slidebox = elements.Scrollable(container, width=width, height=height)
     main.add(header, 0, 0)
-    main.add(container, 0, 60)
+    main.add(slidebox, 0, 60)
 
     # Start the EventDaemon
     log.info("Startup: start HAEventHandler")
