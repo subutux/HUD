@@ -2,13 +2,16 @@
 - [ ] Refactor ui code
    - [ ] Get rid of the if/else on domain. This should be done in `elements.py`
       - [ ] Should be one function call `init_sections`
-   - [ ] Create more classes for specific domains.
+      - [ ] Don't show group header switches when the're useless
+   - [X] Add posibility to change screen width & height. Now everything is 'fixed', especially the width.
+   - [ ] Don't use custom "views", use home assistant's config
+     - [ ] Add support for tabs
+     - [X] Make the window scrollable
+     - [ ] Create more classes for specific domains.
       - [ ] device_tracker
       - [ ] media_player
       - [ ] dropdown
-   - [ ] Don't show group header switches when the're useless
-   - [ ] Add posibility to change screen width & height. Now everything is 'fixed', especially the width.
-- [ ] Allow some/all command line parameters to be set in the configfile 
+- [ ] Allow some/all command line parameters to be set in the configfile
 - [ ] Support notifications
    - [ ] Create a home assistant notification component
    - [ ] Receive notifications over the event stream
@@ -17,4 +20,4 @@
       - [ ] slide down (iOS)
       - [ ] Slide up
 - [ ] Change icon colors depending on state
-   - [ ] use color of lights like home assistant web ui does   
+   - [ ] use color of lights like home assistant web ui does
