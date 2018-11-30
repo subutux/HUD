@@ -181,6 +181,34 @@ class Light(gui.Button):
 #       s.blit(img,(0,0))
 
 
+class Sensor(gui.Button):
+    def __init__(self, api, haevent, **kwargs):
+        self.api = api
+        self.haevent = None
+        super().__init__(haevent.name, **kwargs)
+
+        self.set_hass_event(haevent)
+
+    def set_hass_event(self, haevent):
+        self.haevent = haevent
+
+        if self.haevent.state == hasconst.STATE_OFF:
+
+            self.state = 0
+            self.pcls = ""
+        elif self.haevent.state == hasconst.STATE_ON:
+
+            self.state = 1
+            self.pcls = "down"
+        self.repaint()
+
+    def update_hass_event():
+        self.set_hass_event(remote.get_state(self.api, self.haevent.entity_id))
+
+    def event(self, e):
+        pass
+
+
 class LightSwitch(gui.Switch):
     def __init__(self, api, haevent, **kwargs):
         self.api = api
@@ -396,7 +424,7 @@ class rowSensor(object):
             self.api, self.entity, cls=self.sw_cls, height=20)
         stateWidth = self.state._value.style.width + \
             self.state.style.padding_left + self.state.style.padding_right
-        self.sensorName = Light(
+        self.sensorName = Sensor(
             self.api, self.entity, cls=self.btn_cls, width=(
                 self.sensorName_width - stateWidth), height=20)
         self.widget.add(self.iconButton, 0, 0)
