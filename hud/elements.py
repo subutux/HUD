@@ -331,7 +331,7 @@ class rowLight(object):
         self.width = width
         # self.widget = gui.Table(width=width) if table == None else table
         self.widget = gui.Container(
-            height=20, width=320,
+            height=20, width=width,
             align=-1, valign=-1,
             background=(220, 220, 220))
         self.entity = entity
@@ -358,7 +358,7 @@ class rowLight(object):
             self.iconButton = gui.Button(
                 " ", cls=self.btn_cls, height=20, width=36)
         self.light = Light(self.api, self.entity,
-                           cls=self.btn_cls, width=238, height=20)
+                           cls=self.btn_cls, width=self.width - 84, height=20)
         if self.entity.state != "unknown":
             self.switch = LightSwitch(self.api, self.entity, cls=self.sw_cls)
         else:
