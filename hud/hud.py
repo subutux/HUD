@@ -44,6 +44,14 @@ def main():
    SDL_VIDEODRIVER to \"dummy\". Usefull for testing",
                           dest="dummy", action="store_true",
                           default=False)
+    p_config.add_argument('--width',
+                          help="The width of the display or window",
+                          dest="width", type=int,
+                          default=False)
+    p_config.add_argument('--heigth',
+                          help="The height of the display or window",
+                          dest="height", type=int,
+                          default=False)
     p_homeassistant = p.add_argument_group(
         'HomeAssistant', " (optional) Parameters to override the config file")
     p_homeassistant.add_argument('-H', '--homeassistant', default=None,
@@ -127,6 +135,8 @@ def main():
         exit(1)
 
     log.info("Startup: Setting screen")
+    width = args.width
+    height = args.height
     if args.framebuffer:
         log.info("Startup: Setting framebuffer")
         os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -142,7 +152,7 @@ def main():
         #                         ^UNTESTED!^
     else:
         pygame_opts = SWSURFACE
-    screen = pygame.display.set_mode((320, 480), pygame_opts)
+    screen = pygame.display.set_mode((width, height), pygame_opts)
 
     if args.touchscreen:
         # Hide the mouse cursor if we have a touchscreen
@@ -152,14 +162,15 @@ def main():
     app = gui.Desktop(theme=gui.Theme(whereami + "/pgu.theme"))
     app.connect(gui.QUIT, app.quit, None)
 
-    container = gui.Table(width=230, vpadding=0, hpadding=0)
 
+    container = gui.Table(width=width, vpadding=0, hpadding=0, cls="desktop")
     for section in config.sections():
         if section != "HomeAssistant":
             log.info("Startup: Loading section {}".format(str(section)))
             c = container
             c.tr()
             state = remote.get_state(
+            header = elements.rowHeader(hass, state, table=c, width=width)
                 hass, "group.{}".format(str(config[section]["group"])))
             header = elements.rowHeader(hass, state, table=c)
             HAE.add_listener(state.entity_id, header.set_hass_event)
@@ -184,6 +195,7 @@ def main():
                     if (entity.domain == "light"):
                         row = elements.rowLight(hass, entity, last=(
                             True if entity == entities[-1] else False),
+                            width=width,
                             table=c)
                         log.info("Startup: Adding Event listener for {}"
                                  .format(entity.entity_id))
@@ -191,6 +203,7 @@ def main():
                         # row.draw()
                         c.td(row.draw(), align=-1)
                     elif (entity.domain in ('sensor', 'device_tracker')):
+                            width=width)
                         row = elements.rowSensor(hass, entity, last=(
                             True if entity == entities[-1] else False))
                         log.info("Startup: Adding Event listener for {}"
@@ -201,9 +214,9 @@ def main():
 
             container.td(gui.Spacer(height=4, width=320))
     log.info("Startup: Load elements onto surface")
-    main = gui.Container(width=320, height=480)
-    header = elements.Header("Home Assistant", width=320, height=40)
-
+    main = gui.Container(width=width, height=height)
+    header = elements.Header("Home Assistant", width=width, height=40)
+    slidebox = elements.Scrollable(container, width=width, height=height)
     main.add(header, 0, 0)
     main.add(container, 0, 60)
 
