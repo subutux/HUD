@@ -13,7 +13,7 @@
        - [ ] dropdown
      - [ ] Change icon colors depending on state
        - [ ] use color of lights like home assistant web ui does
-- [ ] Execute service calls using a thread with a queue
+- [X] Execute service calls using a thread with a queue
 - [ ] Allow some/all command line parameters to be set in the configfile
 - [ ] Support notifications
    - [ ] Create a home assistant notification component

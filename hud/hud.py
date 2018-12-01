@@ -8,6 +8,7 @@ import logging
 import signal
 
 from .eventHandler import HAEventHandler
+from . import eventWorker
 from . import elements
 from . import remote
 import pygame
@@ -235,6 +236,7 @@ def main():
     # Start the EventDaemon
     log.info("Startup: start HAEventHandler")
     HAE.start()
+    eventWorker.start(2, hass)
     RunPlease = True
     while RunPlease:
         try:
@@ -249,4 +251,5 @@ def main():
             pass
 
     HAE.stop()
+    eventWorker.stop()
     sys.exit(0)

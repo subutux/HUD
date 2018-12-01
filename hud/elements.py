@@ -2,7 +2,8 @@ from pgu import gui
 from pygame.locals import *
 import pygame.event
 from pgu.gui.const import *
-import homeassistant.remote as remote
+from . import remote
+from . import eventWorker
 import homeassistant.const as hasconst
 import icon_font_to_png
 import os.path
@@ -115,18 +116,7 @@ class Light(gui.Button):
         self.connect(gui.CLICK, self.callback)
 
     def callback(self):
-
-        if self.haevent.state == hasconst.STATE_OFF:
-            remote.call_service(
-                self.api,
-                self.haevent.domain, 'turn_on', {
-                    'entity_id': self.haevent.entity_id
-                })
-        else:
-            remote.call_service(
-                self.api, self.haevent.domain, 'turn_off', {
-                    'entity_id': self.haevent.entity_id
-                })
+        eventWorker.do("toggle_event", self.haevent)
 
     def set_hass_event(self, haevent):
         self.haevent = haevent
@@ -220,18 +210,7 @@ class LightSwitch(gui.Switch):
         self.set_hass_event(haevent)
 
     def callback(self):
-
-        if self.haevent.state == hasconst.STATE_OFF:
-
-            remote.call_service(
-                self.api, "homeassistant", 'turn_on', {
-                    'entity_id': self.haevent.entity_id
-                })
-        else:
-            remote.call_service(
-                self.api, "homeassistant", 'turn_off', {
-                    'entity_id': self.haevent.entity_id
-                })
+        eventWorker.do("toggle_event", self.haevent)
 
     def click(self):
         pass
