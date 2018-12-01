@@ -20,6 +20,7 @@ MarkupSafe = "==0.23"
 Pillow = "==3.4.2"
 PyYAML = "==3.12"
 moosegesture = "*"
+websocket-client = "*"
 
 [dev-packages]
 
