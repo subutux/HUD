@@ -41,11 +41,15 @@ class mdiIcons(object):
         """
         if iconName.startswith("mdi:"):
             iconName = iconName.replace('mdi:', 'mdi-', 1)
+
+        if not iconName.startswith("mdi-"):
+            iconName = "mdi-" + iconName
         file = "{}-x{}-c{}-s{}-HUD.png".format(
             iconName, str(size), color, str(scale))
         # if we find a file in the tmp folder, use that
         if os.path.isfile("{}/{}".format("/tmp", iconName)):
             return gui.Image("{}/{}".format("/tmp", iconName))
+
         self.icons.export_icon(iconName, size, filename=file,
                                export_dir="/tmp", color=color, scale=scale)
         return gui.Image("{}/{}".format("/tmp", file))
