@@ -15,7 +15,8 @@ This project uses [pygame](http://pygame.org) as backed & the awesome
 * displaying group items
 * switching on/off of lights
 * displaying sensor data
-* Uses EventStream (`/api/stream`) for streaming updates
+* ~~Uses EventStream (`/api/stream`) for streaming updates~~
+* Uses the websocket connection of Home Assistant for communication & updates
 * Using `icon_font_to_png` to use the Material Design Icon font on the fly.
 * Cool
 
@@ -38,17 +39,10 @@ HUD needs a configuration file, ini-style. For Example:
 Host = localhost
 Port = 8123
 Key = my-secret-password
-SSL = False
-[lights]
-group=lichten_living
+SSL = True
 ```
 
 The first one speaks for itself, home assistant configuration.
-
-The second one is a group definition. it needs an group entity name
-(for ex. if you have `group.lichten_living` enter `lichten_living`)
-There can be as many sections as you want, if you have at least one
-HomeAssistant section.
 
 ## Auto start
 
@@ -69,6 +63,8 @@ About that last one,This is a work around for a nasty problem with
 SSEClient/requests. The problem was that the requests with
 'stream=True' would'nt initialize when hud is run directly from
 systemd.
+
+> (Needs to be tested after switching to websockets)
 
 For some weird reason running hud from this bash'wrapper' fixes
 the annoyance.
@@ -107,6 +103,8 @@ Configuration:
                         input
   -n, --no-display      We don't have a display. Sets the SDL_VIDEODRIVER to
                         "dummy". Usefull for testing
+  --width               The width of the display
+  --height              The height of the display
 
 HomeAssistant:
   (optional) Parameters to override the config file

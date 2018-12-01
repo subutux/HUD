@@ -1,10 +1,10 @@
 # TODO's
 - [ ] Refactor ui code
-   - [ ] Get rid of the if/else on domain. This should be done in `elements.py`
-      - [ ] Should be one function call `init_sections`
+   - [x] Get rid of the if/else on domain. This should be done in `elements.py`
+      - [X] Should be one function call `render`
       - [ ] Don't show group header switches when the're useless
    - [X] Add posibility to change screen width & height. Now everything is 'fixed', especially the width.
-   - [ ] Don't use custom "views", use home assistant's config
+   - [X] Don't use custom "views", use home assistant's config
      - [ ] Add support for tabs
      - [X] Make the window scrollable
      - [ ] Create more classes for specific domains.
