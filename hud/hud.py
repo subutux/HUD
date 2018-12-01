@@ -6,20 +6,29 @@ import argparse
 import configparser
 import logging
 import signal
+import time
 
 from .eventHandler import HAWebsocketEventHandler
 from . import eventWorker
-from . import elements
+from . import renderer
 from . import remote
 import pygame
 from pygame.locals import *
 from pgu import gui
-
 # Quick-Fix (tm) for systemd
 
 
 def _sighup(signal, frame):
     return true
+
+
+def pygame_print(text, screen, x, y):
+    screen.fill([200, 200, 200])
+    whereami = os.path.dirname(os.path.realpath(__file__))
+    font = pygame.font.Font(whereami + "/pgu.theme/Vera.ttf", 20)
+    text = font.render(text, True, [255, 255, 255])
+    screen.blit(text, (x, y))
+    pygame.display.update()
 
 
 signal.signal(signal.SIGHUP, _sighup)
@@ -134,7 +143,11 @@ def main():
         log.error("hass connection verification failed: {}".format(
             str(validation)))
         exit(1)
-
+    # Start the EventDaemon
+    log.info("Startup: start HAWebsocketEventHandler")
+    HAE.start()
+    log.info("Startup: start EventWorker")
+    eventWorker.start(4, HAE)
     log.info("Startup: Setting screen")
     width = args.width
     height = args.height
@@ -158,85 +171,38 @@ def main():
     if args.touchscreen:
         # Hide the mouse cursor if we have a touchscreen
         pygame.mouse.set_visible(False)
-
+    pygame.display.set_caption("HUD")
+    screen.fill([200, 200, 200])
+    pygame.display.update()
     log.info("Startup: Load Theme")
     app = gui.Desktop(theme=gui.Theme(whereami + "/pgu.theme"))
     app.connect(gui.QUIT, app.quit, None)
+    timeout = 5
+    while timeout != 0:
+        if HAE.authenticated:
+            pygame_print("Connected. Loading view...",
+                         screen, 10, height / 2)
+            break
+        else:
+            timeout -= 1
+            log.info("Waiting for connection")
+            pygame_print("Connecting to home assistant",
+                         screen, 10, height / 2)
+            time.sleep(1)
+    if not HAE.authenticated:
+        log.error("Connection failed")
+        pygame_print("Connection failed",
+                     screen, 10, height / 2)
+        time.sleep(2)
+        sys.exit(1)
 
-    container = gui.Table(width=width, vpadding=0, hpadding=0, cls="desktop")
-    _states = remote.get_states(hass)
-    states = {}
-    for st in _states:
-        states[st.entity_id] = st
-    for section in config.sections():
-        if section != "HomeAssistant":
-            log.info("Startup: Loading section {}".format(str(section)))
-            c = container
-            c.tr()
-            try:
-                state = states["group.{}"
-                               .format(str(config[section]["group"]))]
-            except KeyError:
-                state = None
-            header = elements.rowHeader(hass, state, table=c, width=width)
-            HAE.add_listener(state.entity_id, header.set_hass_event)
-            c.td(header.draw(), align=-1)
-            c.tr()
-            if state is None:
-                log.warning("Startup: Unable to find group.{}".format(
-                    str(config[section]["group"])))
-                c.td(gui.Label("Startup: Unable to find group.{}".format(
-                    str(config[section]["group"]))))
-            else:
-                log.info("Startup: Fetching entity statusses")
-                # get all states from entities & add to the list
-                # if entity is not None (eg. not found)
-                entities = state.attributes['entity_id']
-                for entity in entities:
-                    log.info("Startup: Loading entity {}".format(
-                        entity))
-                    try:
-                        state_entity = states[entity]
-                    except KeyError:
-                        log.info("Cannot find any state for {0}, skipping"
-                                 .format(entity))
-                        continue
-                    # Changeable, lights are hmmMMmmm
-                    if state_entity.domain == "light":
-                        row = elements.rowLight(hass, state_entity, last=(
-                            True if entity == entities[-1] else False),
-                            width=width,
-                            table=c)
-                        log.info("Startup: Adding Event listener for {}"
-                                 .format(entity))
-                        HAE.add_listener(entity, row.set_hass_event)
-                        # row.draw()
-                        c.td(row.draw(), align=-1)
-                    elif state_entity.domain in ('sensor', 'device_tracker'):
-                        row = elements.rowSensor(hass, state_entity, last=(
-                            True if entity == entities[-1] else False),
-                            width=width)
-                        log.info("Startup: Adding Event listener for {}"
-                                 .format(entity))
-                        HAE.add_listener(entity, row.set_hass_event)
-                        c.td(row.draw(), align=-1)
-                    else:
-                        log.info("FIXME:entity {0} has an unknown domain {1}"
-                                 .format(entity, state_entity.domain))
-                    c.tr()
+    main = renderer.render(
+        _states=remote.get_states(hass),
+        width=width,
+        height=height,
+        config=config,
+        EventHandler=HAE)
 
-            container.td(gui.Spacer(height=4, width=width))
-    log.info("Startup: Load elements onto surface")
-    main = gui.Container(width=width, height=height)
-    header = elements.Header("Home Assistant", width=width, height=40)
-    slidebox = elements.Scrollable(container, width=width, height=height)
-    main.add(header, 0, 0)
-    main.add(slidebox, 0, 60)
-
-    # Start the EventDaemon
-    log.info("Startup: start HAWebsocketEventHandler")
-    HAE.start()
-    eventWorker.start(4, HAE)
     RunPlease = True
     while RunPlease:
         try:
