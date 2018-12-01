@@ -196,25 +196,21 @@ def main():
         time.sleep(2)
         sys.exit(1)
 
-    main = renderer.render(
-        _states=remote.get_states(hass),
-        width=width,
-        height=height,
-        config=config,
-        EventHandler=HAE)
+    view = renderer.renderConfig(remote.get_states(hass),
+                                 width, height, config, HAE)
 
     RunPlease = True
     while RunPlease:
         try:
-            log.info("Start screen")
-            app.run(main, screen=screen)
+            app.run(view, screen=screen)
         except (KeyboardInterrupt, SystemExit):
             log.warning("Got Exit or Ctrl-C. Stopping.")
             RunPlease = False
             pass
         except AttributeError as e:
+            log.exception(e)
             log.error("AttributeError, restarting")
-            pass
+            sys.exit(1)
 
     HAE.stop()
     eventWorker.stop()
