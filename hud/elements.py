@@ -107,8 +107,7 @@ class Scrollable(gui.SlideBox):
 
 
 class Light(gui.Button):
-    def __init__(self, api, haevent, **kwargs):
-        self.api = api
+    def __init__(self, haevent, **kwargs):
         self.haevent = None
         super().__init__(haevent.name, **kwargs)
 
@@ -130,9 +129,6 @@ class Light(gui.Button):
             self.state = 1
             self.pcls = "down"
         self.repaint()
-
-    def update_hass_event():
-        self.set_hass_event(remote.get_state(self.api, self.haevent.entity_id))
 
     def event(self, e):
 
@@ -172,8 +168,7 @@ class Light(gui.Button):
 
 
 class Sensor(gui.Button):
-    def __init__(self, api, haevent, **kwargs):
-        self.api = api
+    def __init__(self, haevent, **kwargs):
         self.haevent = None
         super().__init__(haevent.name, **kwargs)
 
@@ -192,16 +187,12 @@ class Sensor(gui.Button):
             self.pcls = "down"
         self.repaint()
 
-    def update_hass_event():
-        self.set_hass_event(remote.get_state(self.api, self.haevent.entity_id))
-
     def event(self, e):
         pass
 
 
 class LightSwitch(gui.Switch):
-    def __init__(self, api, haevent, **kwargs):
-        self.api = api
+    def __init__(self, haevent, **kwargs):
         self.haevent = None
 
         super().__init__(value=False, **kwargs)
@@ -222,12 +213,6 @@ class LightSwitch(gui.Switch):
         elif self.haevent.state == hasconst.STATE_ON:
             self._value = True
         self.repaint()
-
-    def update_hass_event(self):
-        self.set_hass_event(remote.get_state(self.api, self.haevent.entity_id))
-
-#       if self.haevent.state == hasconst.STATE_ON: img = self.style.down
-#       s.blit(img,(0,0))
 
 
 class Header(gui.Button):
@@ -272,8 +257,7 @@ class Header(gui.Button):
 
 
 class sensorValue(gui.Button):
-    def __init__(self, api, haevent, **kwargs):
-        self.api = api
+    def __init__(self, haevent, **kwargs):
         self.haevent = None
         super().__init__("", **kwargs)
         self.set_hass_event(haevent)
@@ -305,8 +289,7 @@ class eventLabel(gui.Label):
 
 
 class rowLight(object):
-    def __init__(self, api, entity, last=False, width=320, table=None):
-        self.api = api
+    def __init__(self, entity, last=False, width=320, table=None):
         self.width = width
         # self.widget = gui.Table(width=width) if table == None else table
         self.widget = gui.Container(
@@ -336,10 +319,10 @@ class rowLight(object):
         else:
             self.iconButton = gui.Button(
                 " ", cls=self.btn_cls, height=20, width=36)
-        self.light = Light(self.api, self.entity,
+        self.light = Light(self.entity,
                            cls=self.btn_cls, width=self.width - 84, height=20)
         if self.entity.state != "unknown":
-            self.switch = LightSwitch(self.api, self.entity, cls=self.sw_cls)
+            self.switch = LightSwitch(self.entity, cls=self.sw_cls)
         else:
             self.switch = gui.Button("", cls=self.btn_cls, width=20, height=20)
 
@@ -350,8 +333,7 @@ class rowLight(object):
 
 
 class rowSensor(object):
-    def __init__(self, api, entity, last=False, width=320):
-        self.api = api
+    def __init__(self, entity, last=False, width=320):
         self.width = width
         # self.widget = gui.Table(width=width)
         self.widget = gui.Container(
@@ -400,11 +382,11 @@ class rowSensor(object):
             self.iconButton = gui.Button(
                 " ", cls=self.btn_cls, height=20, width=36)
         self.state = sensorValue(
-            self.api, self.entity, cls=self.sw_cls, height=20)
+            self.entity, cls=self.sw_cls, height=20)
         stateWidth = self.state._value.style.width + \
             self.state.style.padding_left + self.state.style.padding_right
         self.sensorName = Sensor(
-            self.api, self.entity, cls=self.btn_cls, width=(
+            self.entity, cls=self.btn_cls, width=(
                 self.sensorName_width - stateWidth), height=20)
         self.widget.add(self.iconButton, 0, 0)
         self.widget.add(self.sensorName, 36, 0)
@@ -414,8 +396,8 @@ class rowSensor(object):
 
 
 class rowHeader(rowLight):
-    def __init__(self, api, entity, width=320, table=None):
+    def __init__(self, entity, width=320, table=None):
         self.width = width
-        super().__init__(api, entity, last=False, width=width, table=table)
+        super().__init__(entity, last=False, width=width, table=table)
         self.icon = None
         self.btn_cls = "button_header"
