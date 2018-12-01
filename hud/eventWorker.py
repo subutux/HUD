@@ -5,7 +5,6 @@ a simple threaded queue handler
 from queue import Queue
 import threading
 import logging
-from . import remote
 import homeassistant.const as hasconst
 log = logging.getLogger('HUD.HAEventWorker')
 log.addHandler(logging.NullHandler())
