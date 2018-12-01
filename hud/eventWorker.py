@@ -34,7 +34,10 @@ def Handle(q, api):
         elif action == "callback":
             log.debug("Handling task {}".format(action))
             callback, args = params
-            callback(args)
+            try:
+                callback(args)
+            except Exception as e:
+                log.exception(e)
         q.task_done()
 
 
