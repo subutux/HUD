@@ -25,24 +25,25 @@ def Handle(q, api):
             log.debug("Handling task {}".format(action))
             if params.state == hasconst.STATE_OFF:
 
-                remote.call_service(
-                    api, "homeassistant", 'turn_on', {
-                        'entity_id': params.entity_id
-                    })
+                api.call_service("homeassistant", 'turn_on', {
+                    'entity_id': params.entity_id
+                })
             else:
-                remote.call_service(
-                    api, "homeassistant", 'turn_off', {
-                        'entity_id': params.entity_id
-                    })
-
+                api.call_service("homeassistant", 'turn_off', {
+                    'entity_id': params.entity_id
+                })
+        elif action == "callback":
+            log.debug("Handling task {}".format(action))
+            callback, args = params
+            callback(args)
         q.task_done()
 
 
-def start(num_threads, api):
+def start(num_threads, eventHandler):
     for i in range(num_threads):
         log.debug("Starting eventWorker-{}".format(i))
         worker = threading.Thread(target=Handle,
-                                  args=(Q, api),
+                                  args=(Q, eventHandler),
                                   name="eventWorker-{}".format(i))
         worker.setDaemon(True)
         worker.start()

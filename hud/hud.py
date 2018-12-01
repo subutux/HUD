@@ -7,7 +7,7 @@ import configparser
 import logging
 import signal
 
-from .eventHandler import HAEventHandler
+from .eventHandler import HAWebsocketEventHandler
 from . import eventWorker
 from . import elements
 from . import remote
@@ -123,7 +123,7 @@ def main():
     log.info("Startup: Create EventHandler")
     hass = remote.API(haconfig['host'], haconfig['key'],
                       haconfig['port'], haconfig['ssl'])
-    HAE = HAEventHandler(hass, settings=haconfig)
+    HAE = HAWebsocketEventHandler(settings=haconfig)
     try:
         validation = remote.validate_api(hass)
         if str(validation) != "ok":
@@ -234,9 +234,9 @@ def main():
     main.add(slidebox, 0, 60)
 
     # Start the EventDaemon
-    log.info("Startup: start HAEventHandler")
+    log.info("Startup: start HAWebsocketEventHandler")
     HAE.start()
-    eventWorker.start(2, hass)
+    eventWorker.start(4, HAE)
     RunPlease = True
     while RunPlease:
         try:
