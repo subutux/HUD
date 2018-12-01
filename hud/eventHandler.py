@@ -53,9 +53,12 @@ class HAWebsocketEventHandler(threading.Thread):
 
         if Type and Type == "result":
             if Id and Id in self.requestCallbacks:
-                self.eventWorker.do("callback",
-                                    (self.requestCallbacks[Id],
-                                     msg))
+                log.debug("Executing callback for id %i", Id)
+                try:
+                    eventWorker.do("callback",
+                                   (self.requestCallbacks[Id], msg))
+                except Exception as e:
+                    log.exception(e)
         if Type and Type == "event":
             try:
                 self._handleEvent(msg)
@@ -87,7 +90,7 @@ class HAWebsocketEventHandler(threading.Thread):
             json_data = json.dumps(data)
             log.debug("Sending request with data {}".format(json_data))
             if response:
-                self._register(data["id"], response)
+                self._register(self.lastId, response)
             self.ws.send(json_data)
         else:
             log.warning("Not authenticated!")
