@@ -38,10 +38,15 @@ def renderView(view, states, width, height, EventHandler):
                 row = renderGroup(state, states, width, height, EventHandler)
                 container.td(row)
                 container.tr()
+                container.td(gui.Spacer(cls="desktop", width=width, height=5))
+                container.tr()
             else:
                 row = renderEntity(state, states, width, height, EventHandler)
                 if row:
                     container.td(row)
+                    container.td(gui.Spacer(cls="desktop",
+                                            width=width, height=20))
+                    container.tr()
                     container.tr()
         else:
             log.info("Cannot find any state for {}. Skipping".format(entity))
