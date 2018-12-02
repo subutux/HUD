@@ -124,7 +124,6 @@ class rowMediaInfo(object):
             "width": int(self.width - 100),
             "height": hsize
         })
-        os.remove(tmpfile)
         self.widget.add(self.picture, 50, 0)
         self.widget.add(self.name, 10, hsize - (19 * 3))
         self.widget.add(self.title, 10, hsize - (19 * 2))
