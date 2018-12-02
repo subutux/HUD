@@ -14,7 +14,7 @@ class PlayButton(gui.Button):
 
         self.set_hass_event(haevent)
         self.connect(gui.CLICK, self.callback)
-        self.icon = icons.icon("mdi-play", 20,
+        self.icon = icons.icon("mdi-play", 40,
                                color="rgb(200,200,200)")
         super().__init__(self.icon, **kwargs)
 
@@ -93,6 +93,13 @@ class NextButton(gui.Button):
 
 class rowMediaInfo(object):
     def __init__(self, entity, width=320):
+        self.init_view(entity, width=width)
+        self.pictureUrl = None
+        self.picture = None
+        self.width = width
+        self.set_hass_event(entity, init=True)
+
+    def init_view(self, entity, width=320):
         self.widget = gui.Container(width=width,
                                     align=-1, valign=-1,
                                     background=(255, 255, 255))
@@ -102,12 +109,9 @@ class rowMediaInfo(object):
                                  width=width - 10, background=(255, 255, 255))
         self.name = eventLabel(entity, "friendly_name",
                                width=width - 10, background=(255, 255, 255))
-        self.width = width
-        self.widget.add(self.name, 10, 0)
-        self.widget.add(self.title, 10, 20)
-        self.widget.add(self.artist, 10, 42)
-        self.pictureUrl = None
-        self.set_hass_event(entity)
+        self.widget.add(self.name, 10, 10)
+        self.widget.add(self.title, 10, 30)
+        self.widget.add(self.artist, 10, 52)
 
     def BackgroundFromFile(self, tmpfile):
         size = imagesize.get(tmpfile)
@@ -116,12 +120,12 @@ class rowMediaInfo(object):
             hsize = int(float(size[1]) * wpercent)
         else:
             hsize = size[1]
-        Image = gui.Image(tmpfile, style={
+        self.picture = gui.Image(tmpfile, style={
             "width": int(self.width - 100),
             "height": hsize
         })
         os.remove(tmpfile)
-        self.widget.add(Image, 50, 0)
+        self.widget.add(self.picture, 50, 0)
         self.widget.add(self.name, 10, hsize - (19 * 3))
         self.widget.add(self.title, 10, hsize - (19 * 2))
         self.widget.add(self.artist, 10, hsize - 19)
@@ -132,13 +136,22 @@ class rowMediaInfo(object):
         self.widget.repaint()
         return self.widget
 
-    def set_hass_event(self, event):
+    def set_hass_event(self, event, init=False):
         self.entity = event
-        if "entity_picture" in self.entity.attributes:
+        state = self.entity.state
+        if "entity_picture" in self.entity.attributes and state == "playing":
             if self.pictureUrl != self.entity.attributes["entity_picture"]:
                 self.pictureUrl = self.entity.attributes["entity_picture"]
                 eventWorker.do("download",
                                (self.BackgroundFromFile, self.pictureUrl))
+        elif self.picture:
+            self.pictureUrl = None
+            self.picture = None
+            self.widget.widgets = []
+            self.widget.add(self.name, 10, 10)
+            self.widget.add(self.title, 10, 30)
+            self.widget.add(self.artist, 10, 52)
+            self.widget.repaint()
         self.name.set_hass_event(event)
         self.artist.set_hass_event(event)
         self.title.set_hass_event(event)
@@ -147,20 +160,19 @@ class rowMediaInfo(object):
 class rowMediaControls(object):
     def __init__(self, entity, width=320):
         self.widget = gui.Container(height=20, width=width,
-                                    align=-1, valign=-1,
-                                    background=(255, 255, 255))
+                                    align=-1, valign=-1, cls="last")
         self.entity = entity
         self.width = width
         self.prev = PrevButton(self.entity, height=20, width=36)
-        self.play = PlayButton(self.entity, height=20, width=40)
+        self.play = PlayButton(self.entity, height=20, width=36)
         self.next = NextButton(self.entity, height=20, width=36)
 
     def draw(self):
         total_width = (36 + 16) * 2 + (40 + 16)
         offset = (self.width - total_width) / 2
-        self.widget.add(self.prev, offset, 0)
-        self.widget.add(self.play, offset + 36 + 16, 0)
-        self.widget.add(self.next, offset + (36 + 16) + (40 + 16), 0)
+        self.widget.add(self.prev, offset, 10)
+        self.widget.add(self.play, offset + 30 + 16, 0)
+        self.widget.add(self.next, offset + (36 + 16) + (40 + 16), 10)
         return self.widget
 
     def set_hass_event(self, event):
@@ -179,6 +191,8 @@ class MediaPlayer(object):
         self.controls = rowMediaControls(entity, width=width)
         self.info.set_hass_event(entity)
         self.controls.set_hass_event(entity)
+        self.widget.tr()
+        self.widget.td(gui.Spacer(height=10, cls="desktop", width=width))
         self.widget.tr()
         self.widget.td(self.info.draw())
         self.widget.tr()
