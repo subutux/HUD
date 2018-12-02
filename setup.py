@@ -19,7 +19,8 @@ install_requires = [
     "pgu@https://github.com/parogers/pgu/archive/67558479fe9050ba567a39fc9faa32ce74eba786.tar.gz",  # nopep8
     "pygame>=1.9.2b8",
     "moosegesture>=1.0.2",
-    "websocket-client>=0.54.0"
+    "websocket-client>=0.54.0",
+    "imagesize >= 1.1.0"
 ]
 
 version = re.search(
