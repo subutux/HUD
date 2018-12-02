@@ -91,9 +91,7 @@ class Scrollable(gui.SlideBox):
     def motion(self, _event):
         if self.inMotion:
             self.addPrevLoc(_event.pos)
-            log.debug("Positions: {pos}".format(pos=self.prevLocs))
             direction = moosegesture.getGesture(self.prevLocs)
-            log.debug("Direction {D}".format(D=direction))
             if len(direction) == 0:
                 return
             if direction[-1].startswith("D"):
@@ -106,8 +104,6 @@ class Scrollable(gui.SlideBox):
                 self.hscroll = self.hscroll - 5
             self.offset = (self.hscroll, self.vscroll)
             self.repaint()
-            log.debug("Scroll: {x}, {y}"
-                      .format(x=self.hscroll, y=self.vscroll))
 
 
 class Light(gui.Button):
