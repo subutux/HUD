@@ -14,13 +14,12 @@ install_requires = [
     "homeassistant>0.77",
     "icon-font-to-png==0.3.6",
     "Pillow==3.4.2",
-    "requests==2.20.0",
-    "sseclient==0.0.12",
+    "requests>=2.20.0",
     "tinycss==0.4",
     "pgu@https://github.com/parogers/pgu/archive/67558479fe9050ba567a39fc9faa32ce74eba786.tar.gz",  # nopep8
-    "pygame>=1.9.2b8"
-    "moosegesture=*"
-    "websocket-client=*"
+    "pygame>=1.9.2b8",
+    "moosegesture>=1.0.2",
+    "websocket-client>=0.54.0"
 ]
 
 version = re.search(
