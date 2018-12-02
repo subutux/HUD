@@ -25,7 +25,7 @@ def _sighup(signal, frame):
 def pygame_print(text, screen, x, y):
     screen.fill([200, 200, 200])
     whereami = os.path.dirname(os.path.realpath(__file__))
-    font = pygame.font.Font(whereami + "/pgu.theme/Vera.ttf", 20)
+    font = pygame.font.Font(whereami + "/elements/pgu.theme/Vera.ttf", 20)
     text = font.render(text, True, [255, 255, 255])
     screen.blit(text, (x, y))
     pygame.display.update()
@@ -175,7 +175,7 @@ def main():
     screen.fill([200, 200, 200])
     pygame.display.update()
     log.info("Startup: Load Theme")
-    app = gui.Desktop(theme=gui.Theme(whereami + "/pgu.theme"))
+    app = gui.Desktop(theme=gui.Theme(whereami + "/elements/pgu.theme"))
     app.connect(gui.QUIT, app.quit, None)
     timeout = 5
     while timeout != 0:
