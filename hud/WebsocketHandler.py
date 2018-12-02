@@ -22,7 +22,7 @@ class HAWebsocketEventHandler(object):
 
     def __init__(self, group=None, target=None, name=None,
                  settings={}, kwargs=None, verbose=None):
-
+        self.settings = settings
         protocol = "wss" if settings["ssl"] else "ws"
         self.url = "{}://{}:{}/api/websocket".format(protocol,
                                                      settings["host"],
