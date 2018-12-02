@@ -147,7 +147,7 @@ def main():
     log.info("Startup: start HAWebsocketEventHandler")
     HAE.start()
     log.info("Startup: start EventWorker")
-    eventWorker.start(4, HAE)
+    eventWorker.start(1, HAE)
     log.info("Startup: Setting screen")
     width = args.width
     height = args.height
