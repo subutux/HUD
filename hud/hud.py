@@ -8,7 +8,7 @@ import logging
 import signal
 import time
 
-from .eventHandler import HAWebsocketEventHandler
+from .WebsocketHandler import HAWebsocketEventHandler
 from . import eventWorker
 from . import renderer
 from . import remote

@@ -1,17 +1,14 @@
 import homeassistant.core as ha
-from sseclient import SSEClient
-import requests
 import threading
 import json
 import logging
 import websocket
-import time
 from . import eventWorker
-log = logging.getLogger('HUD.HAEventHandler')
+log = logging.getLogger('HUD.HAWebsocketEventHandler')
 log.addHandler(logging.NullHandler())
 
 
-class HAWebsocketEventHandler(threading.Thread):
+class HAWebsocketEventHandler(object):
     """
     A Home Assistant Websocket actionner
     """
@@ -21,28 +18,34 @@ class HAWebsocketEventHandler(threading.Thread):
     authenticated = False
     requestCallbacks = {}
     lastId = 1
+    worker = None
 
     def __init__(self, group=None, target=None, name=None,
                  settings={}, kwargs=None, verbose=None):
-        self.url = "wss://{}:{}/api/websocket".format(settings["host"],
-                                                      settings["port"])
+
+        protocol = "wss" if settings["ssl"] else "ws"
+        self.url = "{}://{}:{}/api/websocket".format(protocol,
+                                                     settings["host"],
+                                                     settings["port"])
         self.ws = websocket.WebSocketApp(self.url,
                                          on_message=self.on_message,
                                          on_error=self.on_error,
                                          on_close=self.on_close)
         self.password = settings["key"]
-        name = "Thread-websocket-client"
-        threading.Thread.__init__(self, group=group, target=target, name=name)
 
-    def run(self):
+    def start(self):
         log.info("Starting WebSocket")
-        self.ws.run_forever()
+        self.worker = threading.Thread(target=self.ws.run_forever,
+                                       name="Thread-websocket-client")
+        self.worker.setDaemon(True)
+        self.worker.start()
 
     def stop(self):
         log.info("Closing WebSocket")
         self.ws.close()
 
     def on_open(self):
+        log.info("Started WebSocket")
         self.connected = True
 
     def on_message(self, message):
@@ -140,100 +143,3 @@ class HAWebsocketEventHandler(threading.Thread):
             self.callbacks[entity].append(callback)
         else:
             self.callbacks[entity] = [callback]
-
-
-class HAEventHandler(threading.Thread):
-    """
-    Quick and dirty eventHandler
-    """
-
-    def __init__(self, api=None, group=None, target=None, name=None,
-                 settings={}, kwargs=None, verbose=None):
-
-        log.debug("Setup eventHandler")
-        if api is not None:
-            log.warning("'api' parameter is depricated. Remove it.")
-        self.api = api
-        self.callbacks = {}
-        self.states = []
-        self._stopEvent = threading.Event()
-        self.settings = settings
-        self.sse = None
-        close_url = "{}:{}/api/stream?api_password={}&restrict=state_changed,HUD-SSECLIENT-CLOSE"  # nopep8
-        if self.settings["ssl"]:
-            self.url = "https://" + close_url
-        else:
-            self.url = "http://" + close_url
-        self.url = self.url.format(
-            self.settings["host"], self.settings["port"], self.settings["key"])
-        threading.Thread.__init__(self, group=group, target=target, name=name)
-
-    def add_listener(self, entity, callback):
-        log.debug("Adding listener for {} to callback {}".format(
-            str(entity), str(callback.__name__)))
-        if entity in self.callbacks:
-            log.debug(
-                "Found existsing listeners for {}. Adding this one to it."
-                .format(str(entity)))
-            self.callbacks[entity].append(callback)
-        else:
-            cbs = []
-            cbs.append(callback)
-            self.callbacks[entity] = cbs
-
-    def _handleEvent(self, msg):
-        if hasattr(msg, "data") and msg.data != "ping":
-            data = json.loads(msg.data)
-            if data["event_type"] == "state_changed":
-                state = ha.State.from_dict(data["data"]["new_state"])
-                if state.entity_id in self.callbacks:
-                    for cb in self.callbacks[state.entity_id]:
-                        log.info("Event: {}".format(str(state)))
-                        cb(state)
-
-    def run(self):
-        try:
-            self.sse = SSEClient(self.url)
-            log.info("Started SSEClient")
-            for msg in self.sse:
-                log.debug("MSG:{}".format(str(msg)))
-                if not self._stopEvent.isSet():
-                    self._handleEvent(msg)
-                else:
-
-                    log.info("Closing SSEClient")
-                    break
-        except Exception as e:
-            log.error("Got Exception: {}! Exitting thread.".format(str(e)))
-            self.stop()
-
-    def sendClosingEvent(self):
-        """
-        This is bit of a hack. We can't immediatly close our SSEClient
-        connection, until we got an event.
-        We simply send a custom event to HA allowing us to close the
-        connection.
-
-        Source: http://somnambulistic-monkey.blogspot.be/2016/07/
-        home-assistant-custom-events-and-amazon.html
-        """
-        log.debug("Sending Event \"HUD-SSECLIENT-CLOSE\"")
-        url = "{}:{}/api/events/HUD-SSECLIENT-CLOSE?api_password={}"
-        if self.settings["ssl"]:
-            url = "https://" + url
-        else:
-            url = "http://" + url
-        url = url.format(
-            self.settings["host"], self.settings["port"], self.settings["key"])
-        requests.post(url)
-
-    def stop(self):
-
-        log.info("Stopping SSEClient")
-        log.debug("Stopping SSEClient->_stopEvent.set()")
-        self._stopEvent.set()
-        log.info("Waiting for an Event to close ...")
-        self.sendClosingEvent()
-
-    def isStopped(self):
-        return self._stopEvent.isSet()
